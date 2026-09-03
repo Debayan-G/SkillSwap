@@ -1,2 +1,21 @@
 # SkillSwap
-SkillSwap is a peer-to-peer skill exchange platform where users can learn new skills, share their knowledge, and connect with others based on their interests and expertise.
+
+A peer-to-peer skill exchange platform.
+
+## Features
+
+- User registration and login
+- User profiles
+- Skill sharing
+- Learn new skills
+- Skill interests
+- Skill exchange
+- Firebase authentication
+- ...
+
+## Tech Stack
+
+- HTML
+- CSS
+- JavaScript
+- Firebase
