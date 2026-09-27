@@ -7,6 +7,7 @@
 **SkillSwap** is a peer-to-peer learning platform where students share skills, teach what they know, and use Skill Credits to learn something new.
 
 [Open SkillSwap](https://joyful-blini-599dc7.netlify.app) · [Supabase setup](SUPABASE_SETUP.md)
+
 <p><strong>💜 Like SkillSwap? <a href="https://lablab.ai/ai-hackathons/ibm-bob-2-hackathon/prompters/skillswap-learn-more-teach-what-you-know">Please consider giving it a like in the IBM Bob 2.0 Hackathon →</a></strong></p>
 
 <br />
@@ -64,13 +65,27 @@ Skillswap/
 ├── supabase-config.js        # Supabase project URL and anon/public key
 ├── SUPABASE_SETUP.md         # Database, auth, and deployment setup
 ├── README.md
-└── assets/
-    ├── skillswap-banner.gif  # README animation: typewriter headline and portal
-    ├── skill-loop.gif        # README animation: Share → Teach → Learn
-    ├── skillswap-banner.svg  # Editable vector source
-    └── skill-loop.svg        # Editable vector source
+├── skillswap-banner.gif      # README animation: typewriter headline and portal
+├── skill-loop.gif            # README animation: Share → Teach → Learn
+├── github-follow.gif         # Animated GitHub profile follow invitation
+├── skillswap-banner.svg      # Editable vector source
+└── skill-loop.svg            # Editable vector source
 ```
 
 ## 💜 The idea
 
 Knowledge is currency. SkillSwap makes it easier for students to exchange what they know, discover what they want to learn, and grow together—one skill swap at a time.
+
+---
+
+<div align="center">
+
+## 🌟 Enjoyed SkillSwap?
+
+### 💜 [Visit my GitHub profile and consider giving me a follow →](https://github.com/Debayan-G)
+
+[<img src="github-follow.gif" alt="Animated invitation: visit my GitHub profile and consider following me." width="100%" />](https://github.com/Debayan-G)
+
+*The animated banner is clickable too.*
+
+</div>
