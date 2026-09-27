@@ -26,8 +26,6 @@
 - **Track your progress** with a dashboard, activity history, and leaderboard.
 - Enjoy a responsive dark interface with animated backgrounds and reduced-motion support.
 
-The README artwork is animated too: its headline types line by line and loops, while the skill cycle has drifting cards, flowing connectors, traveling lights, and pulsing ripples. Animated GIFs are used so the motion plays in GitHub's README view; matching SVG source files are included for editing.
-
 > The landing page includes illustrative demo statistics. Configure Supabase to enable account sign-in and cross-device account data. See the setup guide for database and sync details.
 
 ## 🚀 Run it locally
