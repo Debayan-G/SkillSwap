@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/skillswap-banner.svg" alt="SkillSwap — Learn more. Teach what you know." width="100%" />
+<img src="skillswap-banner.svg" alt="SkillSwap — Learn more. Teach what you know." width="100%" />
 
 ### Learn from each other. Grow together.
 
