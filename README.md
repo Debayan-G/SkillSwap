@@ -7,7 +7,7 @@
 **SkillSwap** is a peer-to-peer learning platform where students share skills, teach what they know, and use Skill Credits to learn something new.
 
 [Open SkillSwap](https://joyful-blini-599dc7.netlify.app) · [Supabase setup](SUPABASE_SETUP.md)
-If you like SkillSwap, please consider [giving it a like on the lablab.ai IBM Bob 2.0 Hackathon page](https://lablab.ai/ai-hackathons/ibm-bob-2-hackathon/prompters/skillswap-learn-more-teach-what-you-know).
+<p><strong>💜 Like SkillSwap? <a href="https://lablab.ai/ai-hackathons/ibm-bob-2-hackathon/prompters/skillswap-learn-more-teach-what-you-know">Please consider giving it a like in the IBM Bob 2.0 Hackathon →</a></strong></p>
 
 <br />
 
