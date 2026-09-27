@@ -1,0 +1,1983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SkillSwap — Learn more. Teach what you know.</title>
+<link id="ss-favicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M10 10 22 22' stroke='%23A78BFA' stroke-width='2.5'/%3E%3Ccircle cx='10' cy='10' r='5' fill='%237C3AED'/%3E%3Ccircle cx='22' cy='22' r='5' fill='%2322D3EE'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<style>
+  :root {
+    color-scheme: dark;
+    --ss-bg: #05060a;
+    --ss-purple: #7c3aed;
+    --ss-violet: #8b5cf6;
+    --ss-indigo: #6366f1;
+    --ss-cyan: #22d3ee;
+  }
+
+  html,
+  body {
+    background:
+      radial-gradient(circle at 15% 10%, rgba(124,58,237,.16), transparent 32%),
+      radial-gradient(circle at 85% 15%, rgba(34,211,238,.10), transparent 30%),
+      radial-gradient(circle at 50% 100%, rgba(99,102,241,.12), transparent 38%),
+      var(--ss-bg);
+    min-height: 100%;
+  }
+
+  body {
+    font-family:'Inter',sans-serif;
+    color:#fff;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+    overflow-x:hidden;
+  }
+
+  .font-display{ font-family:'Space Grotesk','Inter',sans-serif; }
+
+  /* =========================================================
+     PREMIUM SKILLSWAP BACKGROUND
+     ========================================================= */
+  .ss-bg {
+    position:fixed !important;
+    inset:0 !important;
+    z-index:0 !important;
+    overflow:hidden;
+    pointer-events:none;
+    background:
+      radial-gradient(ellipse 80% 70% at 50% -20%, rgba(124,58,237,.14), transparent 65%),
+      radial-gradient(ellipse 60% 50% at 100% 50%, rgba(34,211,238,.07), transparent 70%),
+      radial-gradient(ellipse 60% 50% at 0% 80%, rgba(139,92,246,.08), transparent 70%),
+      #05060a;
+  }
+
+  .ss-bg::before {
+    content:"";
+    position:absolute;
+    inset:-25%;
+    background:
+      radial-gradient(circle at 18% 18%, rgba(124,58,237,.16), transparent 20%),
+      radial-gradient(circle at 82% 22%, rgba(34,211,238,.10), transparent 18%),
+      radial-gradient(circle at 52% 82%, rgba(99,102,241,.10), transparent 24%);
+    filter:blur(50px);
+    opacity:.9;
+    animation:ssAurora 16s ease-in-out infinite alternate;
+  }
+
+  .ss-orb-field { position:absolute; inset:0; overflow:hidden; pointer-events:none; }
+  .ss-orb { position:absolute; width:clamp(260px,38vw,620px); aspect-ratio:1; border-radius:50%; filter:blur(42px); opacity:.34; will-change:transform; animation:ssOrbJourney 26s ease-in-out infinite alternate; }
+  .ss-orb-violet { left:-17%; top:-24%; background:radial-gradient(circle at 45% 45%,rgba(139,92,246,.62),rgba(124,58,237,.18) 36%,transparent 70%); }
+  .ss-orb-cyan { right:-19%; top:16%; width:clamp(240px,34vw,540px); background:radial-gradient(circle at 45% 45%,rgba(34,211,238,.48),rgba(8,145,178,.16) 38%,transparent 72%); animation-duration:32s; animation-direction:alternate-reverse; }
+  .ss-orb-indigo { left:30%; bottom:-45%; width:clamp(300px,44vw,700px); background:radial-gradient(circle at 50% 45%,rgba(99,102,241,.42),rgba(79,70,229,.14) 38%,transparent 72%); animation-duration:38s; }
+  @keyframes ssOrbJourney { 0%{transform:translate3d(-3vw,-2vh,0) scale(.92)} 50%{transform:translate3d(4vw,5vh,0) scale(1.08)} 100%{transform:translate3d(-1vw,8vh,0) scale(.98)} }
+
+  .ss-bg::after {
+    content:"";
+    position:absolute;
+    inset:0;
+    background:
+      radial-gradient(310px circle at var(--pointer-x,50%) var(--pointer-y,35%), rgba(124,58,237,.075), transparent 78%),
+      linear-gradient(to bottom, rgba(5,6,10,0) 0%, rgba(5,6,10,.12) 55%, rgba(5,6,10,.45) 100%),
+      radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,.28) 100%);
+  }
+  @media(max-width:640px){
+    .ss-bg::before { filter:blur(30px); }
+    .ss-orb { filter:blur(28px); }
+    .ss-glow { filter:blur(22px); }
+  }
+
+  @keyframes ssAurora {
+    0%   { transform:translate3d(-1%,0,0) scale(1); }
+    50%  { transform:translate3d(1.5%,-1%,0) scale(1.06); }
+    100% { transform:translate3d(-.5%,1%,0) scale(1.02); }
+  }
+
+  .ss-grid {
+    position:absolute !important;
+    inset:-20% !important;
+    background-image:
+      linear-gradient(rgba(139,92,246,.055) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(34,211,238,.045) 1px, transparent 1px);
+    background-size:64px 64px;
+    opacity:.65;
+    -webkit-mask-image:radial-gradient(ellipse 80% 75% at 50% 40%, black 20%, transparent 82%);
+    mask-image:radial-gradient(ellipse 80% 75% at 50% 40%, black 20%, transparent 82%);
+    animation:gridDrift 45s linear infinite;
+  }
+
+  @keyframes gridDrift {
+    0% { transform:translate3d(0,0,0); }
+    100% { transform:translate3d(64px,64px,0); }
+  }
+
+  .ss-glow {
+    position:absolute !important;
+    inset:-20% !important;
+    background:
+      radial-gradient(circle at 25% 20%, rgba(124,58,237,.18), transparent 24%),
+      radial-gradient(circle at 75% 25%, rgba(34,211,238,.12), transparent 22%),
+      radial-gradient(circle at 50% 75%, rgba(99,102,241,.10), transparent 28%);
+    filter:blur(35px);
+    opacity:.85;
+    animation:ssAmbient 12s ease-in-out infinite alternate;
+  }
+
+  @keyframes ssAmbient {
+    0% { transform:scale(1) translate3d(0,0,0); }
+    50% { transform:scale(1.06) translate3d(1%,-1%,0); }
+    100% { transform:scale(1.02) translate3d(-1%,1%,0); }
+  }
+
+  .ss-dots { position:absolute !important; inset:0 !important; opacity:.8; }
+
+  .ss-dot {
+    position:absolute;
+    width:3px !important;
+    height:3px !important;
+    border-radius:50%;
+    background:#a78bfa;
+    box-shadow:0 0 8px rgba(167,139,250,.8), 0 0 20px rgba(124,58,237,.35);
+    animation:ssFloat 8s ease-in-out infinite, ssPulse 4s ease-in-out infinite;
+  }
+
+  @keyframes ssFloat {
+    0%,100% { transform:translate3d(0,0,0); }
+    50% { transform:translate3d(8px,-18px,0); }
+  }
+
+  @keyframes ssPulse {
+    0%,100% { opacity:.35; }
+    50% { opacity:.9; }
+  }
+
+  .ss-hero > * { opacity:0; }
+  .ss-hero.is-intro-revealed > * { animation:ssRise .72s cubic-bezier(.2,.7,.2,1) both; }
+  .ss-hero.is-intro-revealed > *:nth-child(1) { animation-delay:0s; }
+  .ss-hero.is-intro-revealed > *:nth-child(2) { animation-delay:.26s; }
+  .ss-hero.is-intro-revealed > *:nth-child(3) { animation-delay:1.05s; }
+  .ss-hero.is-intro-revealed > *:nth-child(4) { animation-delay:1.35s; }
+  .ss-hero.is-intro-revealed > *:nth-child(5) { animation-delay:1.62s; }
+  .ss-hero h1 > span { display:inline-block; }
+  .ss-type-char { display:inline-block; opacity:0; transform:translateY(.24em); animation:ssTypeChar .34s cubic-bezier(.16,1,.3,1) forwards; animation-delay:var(--char-delay); }
+  .ss-title-accent .ss-type-char { background:linear-gradient(100deg,#fff 12%,#c4b5fd 54%,#67e8f9 100%); color:transparent; background-clip:text; -webkit-background-clip:text; }
+  @keyframes ssTypeChar { to { opacity:1; transform:translateY(0); } }
+  @keyframes ssRise { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
+  .ss-orbit-canvas { position:absolute; inset:0; width:100%; height:100%; z-index:1; opacity:.54; pointer-events:none; mix-blend-mode:screen; }
+  @media(max-width:640px) { .ss-orbit-canvas { opacity:.32; } }
+  .ss-reveal { opacity:0; transform:translateY(22px); transition:opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1); }
+  .ss-reveal.is-visible { opacity:1; transform:translateY(0); }
+  .ss-reveal.is-visible:nth-child(2) { transition-delay:.08s; }
+  .ss-reveal.is-visible:nth-child(3) { transition-delay:.16s; }
+  .ss-reveal.is-visible:nth-child(4) { transition-delay:.24s; }
+
+  /* Keep application content above the background layer. */
+  #app { position:relative; z-index:1; }
+
+  @keyframes toastIn{ from{opacity:0; transform:translateY(8px) scale(.98);} to{opacity:1; transform:translateY(0) scale(1);} }
+  .toast-in{ animation:toastIn .22s ease-out; }
+  @keyframes modalFade{ from{opacity:0;} to{opacity:1;} }
+  .modal-fade{ animation:modalFade .15s ease-out; }
+  @keyframes modalPop{ from{opacity:0; transform:scale(.97) translateY(6px);} to{opacity:1; transform:scale(1) translateY(0);} }
+  .modal-pop{ animation:modalPop .18s cubic-bezier(.16,1,.3,1); }
+
+  ::selection{ background:rgba(124,58,237,.45); color:#fff; }
+  *{ scrollbar-width:none; }
+  *::-webkit-scrollbar{ display:none; width:0; height:0; }
+  input[type="date"]::-webkit-calendar-picker-indicator, input[type="time"]::-webkit-calendar-picker-indicator{ filter:invert(1); opacity:.5; }
+  button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible{ outline:2px solid rgba(167,139,250,.6); outline-offset:2px; }
+  .line-clamp-2{ display:-webkit-box; line-clamp:2; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+
+  /* =========================================================
+     GLASS CARDS
+     ========================================================= */
+  .ss-card {
+    border-radius:1rem;
+    border:1px solid rgba(255,255,255,.09);
+    background:linear-gradient(135deg, rgba(255,255,255,.045), rgba(255,255,255,.015));
+    box-shadow:0 20px 60px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.025);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+  }
+  .ss-auth-shell .ss-card { background:transparent !important; border-color:transparent !important; box-shadow:none !important; backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }
+
+  .ss-card-hover {
+    transition:transform .25s ease, border-color .25s ease, background .25s ease, box-shadow .25s ease;
+  }
+
+  .ss-card-hover:hover {
+    transform:translateY(-3px);
+    border-color:rgba(167,139,250,.25);
+    background:linear-gradient(135deg, rgba(124,58,237,.07), rgba(34,211,238,.025));
+    box-shadow:0 25px 70px rgba(0,0,0,.4), 0 0 35px rgba(124,58,237,.06);
+  }
+  @media (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference) {
+    .ss-tilt { transform-style:preserve-3d; will-change:transform; }
+    .ss-tilt:hover { transform:perspective(900px) rotateX(var(--tilt-y,0deg)) rotateY(var(--tilt-x,0deg)) translateY(-4px); }
+  }
+  .ss-intro { position:fixed; inset:0; z-index:9999; display:grid; place-items:center; overflow:hidden; isolation:isolate; background:radial-gradient(ellipse at 50% 45%,rgba(91,33,182,.32),transparent 42%),radial-gradient(ellipse at 82% 24%,rgba(8,145,178,.2),transparent 36%),#05060a; will-change:opacity; }
+  .ss-intro::before { content:""; position:absolute; z-index:-1; width:min(72vw,680px); aspect-ratio:1; border:1px solid rgba(167,139,250,.2); border-radius:50%; box-shadow:0 0 120px rgba(124,58,237,.2),inset 0 0 100px rgba(34,211,238,.06); animation:ssIntroOrbit 9s linear infinite; }
+  .ss-intro::after { content:""; position:absolute; z-index:-1; width:min(105vw,1100px); aspect-ratio:1; border:1px solid rgba(34,211,238,.08); border-radius:50%; box-shadow:0 0 0 42px rgba(167,139,250,.018),0 0 0 84px rgba(34,211,238,.014); animation:ssIntroOrbit 16s linear infinite reverse; }
+  .ss-intro-tunnel { position:absolute; z-index:-1; left:50%; top:50%; width:min(46vw,460px); aspect-ratio:1; border-radius:50%; opacity:0; transform:translate(-50%,-50%) scale(.08); background:repeating-radial-gradient(circle,transparent 0 28px,rgba(167,139,250,.18) 29px 30px,transparent 31px 56px),conic-gradient(from 20deg,transparent,rgba(124,58,237,.22),transparent 28%,rgba(34,211,238,.18),transparent 62%,rgba(167,139,250,.2),transparent); box-shadow:0 0 70px rgba(124,58,237,.2),inset 0 0 50px rgba(34,211,238,.12); mask-image:radial-gradient(circle,transparent 0 13%,#000 18% 72%,transparent 78%); will-change:transform,opacity; }
+  .ss-intro-flash { position:absolute; inset:0; z-index:-1; opacity:0; background:radial-gradient(ellipse at center,rgba(255,255,255,.72),rgba(167,139,250,.32) 12%,rgba(5,6,10,0) 54%); pointer-events:none; }
+  .ss-intro-brand { position:fixed; left:50%; top:50%; display:flex; align-items:center; gap:.18em; white-space:nowrap; transform:translate(-50%,-50%); transform-origin:center; font-family:'Space Grotesk','Inter',sans-serif; font-size:clamp(4rem,12vw,8rem); font-weight:700; letter-spacing:-.075em; color:#fff; text-shadow:0 0 60px rgba(167,139,250,.32); will-change:transform,opacity,filter; }
+  .ss-intro-brand svg { width:.8em; height:.8em; flex:none; }
+  .ss-intro-brand span { font-size:1em; font-weight:700; line-height:1; letter-spacing:-.075em; }
+  .ss-intro-caption { position:absolute; top:calc(50% + clamp(4.6rem,14vw,9rem)); color:rgba(255,255,255,.54); font-size:.72rem; letter-spacing:.22em; text-transform:uppercase; animation:ssCaptionIn .8s .42s both; }
+  .ss-intro-caption::before { content:""; display:inline-block; width:20px; height:1px; margin:0 10px 3px 0; background:linear-gradient(90deg,#8b5cf6,#22d3ee); box-shadow:0 0 12px rgba(139,92,246,.8); }
+  .ss-login-transition { position:fixed; inset:0; z-index:10001; display:grid; place-items:center; overflow:hidden; isolation:isolate; background:radial-gradient(ellipse at center,rgba(54,35,115,.38),transparent 48%),#05060a; color:white; }
+  .ss-login-portal { position:absolute; left:50%; top:50%; width:min(48vw,480px); aspect-ratio:1; border:1px solid rgba(196,181,253,.45); border-radius:50%; opacity:0; transform:translate(-50%,-50%) scale(.12); background:repeating-radial-gradient(circle,transparent 0 34px,rgba(167,139,250,.22) 35px 36px,transparent 37px 70px),conic-gradient(from 0deg,transparent,rgba(124,58,237,.34),transparent 36%,rgba(34,211,238,.3),transparent 68%,rgba(167,139,250,.28),transparent); box-shadow:0 0 60px rgba(124,58,237,.28),inset 0 0 65px rgba(34,211,238,.15); mask-image:radial-gradient(circle,transparent 0 12%,#000 19% 73%,transparent 82%); will-change:transform,opacity; }
+  .ss-login-portal.is-open { animation:ssLoginPortalOpen 1s .12s cubic-bezier(.16,1,.3,1) both; }
+  .ss-login-ripple { position:absolute; left:50%; top:50%; width:min(30vw,300px); aspect-ratio:1; border:1px solid rgba(103,232,249,.65); border-radius:50%; opacity:0; transform:translate(-50%,-50%) scale(.25,.18); }
+  .ss-login-ripple.is-rippling { animation:ssWaterRipple 1.15s cubic-bezier(.12,.65,.22,1) both; }
+  .ss-login-ripple:nth-child(2).is-rippling { animation-delay:.12s; }
+  .ss-login-ripple:nth-child(3).is-rippling { animation-delay:.24s; }
+  .ss-login-message { position:relative; z-index:1; max-width:min(90vw,820px); text-align:center; font-family:'Space Grotesk','Inter',sans-serif; font-size:clamp(1.7rem,5vw,3.6rem); line-height:1.15; font-weight:600; letter-spacing:-.04em; text-shadow:0 0 36px rgba(167,139,250,.38); }
+  .ss-login-char { display:inline-block; opacity:0; transform:translateY(.35em); animation:ssLoginType .38s cubic-bezier(.16,1,.3,1) forwards; animation-delay:var(--login-char-delay); }
+  @keyframes ssLoginType { to { opacity:1; transform:translateY(0); } }
+  @keyframes ssLoginPortalOpen { 0% { opacity:0; transform:translate(-50%,-50%) scale(.12) rotate(-20deg); } 45% { opacity:1; } 100% { opacity:.7; transform:translate(-50%,-50%) scale(1.5) rotate(36deg); } }
+  @keyframes ssWaterRipple { 0% { opacity:0; transform:translate(-50%,-50%) scale(.2,.12); } 12% { opacity:.85; } 100% { opacity:0; transform:translate(-50%,-50%) scale(3.2,2.1); } }
+  @keyframes ssIntroOrbit { to { transform:rotate(360deg); } }
+  @keyframes ssCaptionIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+  .ss-public-header > div > button:first-child { transition:transform .2s ease, filter .2s ease; }
+  .ss-public-header > div > button:first-child:hover { transform:translateY(-1px); filter:drop-shadow(0 0 12px rgba(139,92,246,.45)); }
+  .ss-public-header { border-image:linear-gradient(90deg,transparent,rgba(167,139,250,.24),rgba(34,211,238,.18),transparent) 1; }
+  header.ss-public-header { background:transparent !important; backdrop-filter:none !important; -webkit-backdrop-filter:none !important; border-bottom:0 !important; box-shadow:none; }
+  .ss-hero h1 { text-shadow:0 8px 50px rgba(124,58,237,.15); }
+  .ss-title-accent { background:linear-gradient(100deg,#fff 12%,#c4b5fd 54%,#67e8f9 100%); color:transparent; background-clip:text; -webkit-background-clip:text; }
+
+  .ss-input {
+    width:100%;
+    border-radius:.5rem;
+    background:rgba(255,255,255,.045);
+    border:1px solid rgba(255,255,255,.1);
+    padding:.625rem .875rem;
+    font-size:.875rem;
+    color:#fff;
+    outline:none;
+    transition:border-color .15s, background .15s, box-shadow .15s;
+  }
+
+  .ss-input::placeholder{ color:rgba(255,255,255,.3); }
+  .ss-input:focus{ border-color:rgba(167,139,250,.5); background:rgba(255,255,255,.065); box-shadow:0 0 0 3px rgba(124,58,237,.08); }
+
+  .ss-btn{ display:inline-flex; align-items:center; justify-content:center; gap:.5rem; font-weight:500; border-radius:.5rem; transition:all .15s; white-space:nowrap; cursor:pointer; }
+  .ss-btn:disabled{ opacity:.4; pointer-events:none; }
+  .ss-btn-primary{ background:linear-gradient(110deg,#7c3aed,#6366f1 60%,#4f46e5); color:#fff; box-shadow:0 10px 30px rgba(124,58,237,.25), 0 0 0 1px rgba(167,139,250,.08) inset; }
+  .ss-btn-primary:hover{ filter:brightness(1.08); box-shadow:0 12px 35px rgba(124,58,237,.38), 0 0 25px rgba(124,58,237,.12); }
+  .ss-btn-secondary{ background:rgba(255,255,255,.06); color:#fff; border:1px solid rgba(255,255,255,.1); }
+  .ss-btn-secondary:hover{ background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.2); }
+  .ss-btn-ghost{ color:rgba(255,255,255,.7); }
+  .ss-btn-ghost:hover{ color:#fff; background:rgba(255,255,255,.06); }
+  .ss-btn-danger{ background:rgba(244,63,94,.1); color:#fb7185; border:1px solid rgba(244,63,94,.2); }
+  .ss-btn-danger:hover{ background:rgba(244,63,94,.15); }
+  .ss-badge{ display:inline-flex; align-items:center; gap:.25rem; border-radius:9999px; border:1px solid; padding:.125rem .625rem; font-size:11px; font-weight:500; }
+  .toggle{ width:2.5rem; height:1.5rem; border-radius:9999px; position:relative; transition:background .15s; }
+  .toggle-knob{ position:absolute; top:2px; left:2px; height:1.25rem; width:1.25rem; border-radius:9999px; background:#fff; transition:transform .15s; }
+
+  /* =========================================================
+     APP CHROME
+     ========================================================= */
+  header {
+    background:linear-gradient(180deg, rgba(5,6,10,.94), rgba(5,6,10,.76)) !important;
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+    box-shadow:0 10px 40px rgba(0,0,0,.18);
+  }
+  .ss-app-sidebar { position:relative; isolation:isolate; border-right:0 !important; background:transparent !important; backdrop-filter:none !important; -webkit-backdrop-filter:none !important; box-shadow:none; }
+  .ss-app-sidebar::before { content:none; }
+  .ss-app-sidebar::after { content:none; }
+  header.ss-app-topbar { position:sticky; isolation:isolate; border-bottom:0 !important; background:transparent !important; backdrop-filter:none !important; -webkit-backdrop-filter:none !important; box-shadow:none; }
+  header.ss-app-topbar::before { content:none; }
+  .ss-mobile-nav { border-top:0 !important; background:transparent !important; backdrop-filter:none !important; -webkit-backdrop-filter:none !important; box-shadow:none; }
+  .ss-mobile-drawer { border-right:0 !important; background:transparent !important; backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ss-grid,
+    .ss-glow,
+    .ss-bg::before,
+    .ss-orb,
+    .ss-dot,
+    .ss-card-hover,
+    .ss-hero > *,
+    .ss-type-char,
+    .ss-reveal,
+    .ss-intro::before,
+    .toast-in,
+    .modal-pop,
+    .modal-fade {
+      animation:none !important;
+      transition:none !important;
+    }
+    .ss-hero > *, .ss-type-char, .ss-reveal { opacity:1 !important; filter:none !important; transform:none !important; }
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast-host" class="fixed bottom-4 right-4 z-[200] flex flex-col gap-2 w-[min(360px,calc(100vw-2rem))]"></div>
+<div id="modal-root"></div>
+<script>
+/* ============================================================================
+   SKILLSWAP — Supabase accounts; demo app data persisted in localStorage.
+============================================================================ */
+
+/* ---------------------------------- UTIL ---------------------------------- */
+const uid = (p="id") => `${p}_${Math.random().toString(36).slice(2,10)}`;
+const nowISO = () => new Date().toISOString();
+const clamp = (n,a,b) => Math.max(a, Math.min(b,n));
+function timeAgo(iso){
+  const s = Math.floor((Date.now() - new Date(iso).getTime())/1000);
+  if (s < 10) return "just now";
+  if (s < 60) return `${s}s ago`;
+  const m = Math.floor(s/60); if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m/60); if (h < 24) return `${h}h ago`;
+  const d = Math.floor(h/24); if (d < 7) return `${d}d ago`;
+  const w = Math.floor(d/7); if (w < 5) return `${w}w ago`;
+  return new Date(iso).toLocaleDateString();
+}
+function initials(name=""){ return name.split(" ").filter(Boolean).slice(0,2).map(w=>w[0]?.toUpperCase()).join(""); }
+const AVATAR_HUES = ["#7C3AED","#6366F1","#22D3EE","#EC4899","#F59E0B","#10B981"];
+function hueFor(seed=""){ let h=0; for(let i=0;i<seed.length;i++) h=(h*31+seed.charCodeAt(i))>>>0; return AVATAR_HUES[h % AVATAR_HUES.length]; }
+function esc(s=""){ return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+/* ------------------------------ SEED DATA ---------------------------------- */
+const CATEGORIES = ["Programming","Design","Business","Languages","Music","Photography","Video","Academics","Marketing","Communication"];
+const SKILL_POOL = [
+  ["Python Programming","Programming"],["React Development","Programming"],["JavaScript Fundamentals","Programming"],
+  ["UI/UX Design","Design"],["Figma Prototyping","Design"],["Graphic Design","Design"],["Product Design","Design"],
+  ["Photography Basics","Photography"],["Portrait Photography","Photography"],["Video Editing","Video"],
+  ["Motion Graphics","Video"],["Digital Marketing","Marketing"],["Social Media Strategy","Marketing"],
+  ["Public Speaking","Communication"],["Spanish Conversation","Languages"],["French for Beginners","Languages"],
+  ["Guitar Lessons","Music"],["Music Production","Music"],["Piano Fundamentals","Music"],
+  ["Data Science with Python","Academics"],["Calculus Tutoring","Academics"],["Excel for Analysis","Business"],
+  ["Startup Fundamentals","Business"],["Personal Finance 101","Business"],["Resume & Interview Prep","Communication"],
+  ["Machine Learning Basics","Programming"],["Node.js & APIs","Programming"],["Watercolor Painting","Design"],
+  ["Creative Writing","Communication"],["German Conversation","Languages"],["Podcast Editing","Video"],
+];
+const FIRST_NAMES = ["Alex","Priya","Jordan","Maya","Ethan","Sofia","Liam","Ananya","Noah","Chloe","Ravi","Zara","Leo","Ines","Kai","Nora","Diego","Yuki","Omar","Elena"];
+const LAST_NAMES = ["Sharma","Chen","Patel","Garcia","Kim","Müller","Rossi","Kapoor","Silva","Nguyen","Okafor","Novak","Tanaka","Rivera","Haddad","Ivanova","Larsson","Costa","Yamada","Fischer"];
+const UNIVERSITIES = ["Stanford University","MIT","UC Berkeley","University of Toronto","NUS Singapore","IIT Bombay","ETH Zürich","University of Melbourne","UCL London","Georgia Tech"];
+
+function seedUsers(){
+  const users = [];
+  for (let i=0;i<20;i++){
+    const name = `${FIRST_NAMES[i]} ${LAST_NAMES[(i*3)%LAST_NAMES.length]}`;
+    const username = (name.toLowerCase().replace(/\s+/g,"") + (i>9?i:"")).slice(0,16);
+    const teachCount = 1 + (i%3);
+    const teach = [];
+    for (let t=0;t<teachCount;t++){ const [sname]=SKILL_POOL[(i*2+t)%SKILL_POOL.length]; teach.push({name:sname, level:["Beginner","Intermediate","Advanced"][(i+t)%3], years:1+((i+t)%5)}); }
+    const learn = [];
+    for (let l=0;l<2;l++){ const [sname]=SKILL_POOL[(i*5+l+7)%SKILL_POOL.length]; if(!teach.find(t=>t.name===sname)) learn.push({name:sname}); }
+    users.push({ id:uid("u"), name, username, email:`${username}@student.edu`,
+      avatarColor:hueFor(name), university:UNIVERSITIES[i%UNIVERSITIES.length], mobile: i%4===0?"":`+1 555 01${10+i}`,
+      about:`${name.split(" ")[0]} is a student who loves ${teach[0]?.name.toLowerCase()||"learning"} and is always up for a good knowledge swap.`,
+      teachSkills:teach, learnSkills:learn, credits:60+((i*37)%400), rating:(4.2+(i%8)*0.1).toFixed(1),
+      sessionsTaught:(i*3)%40, sessionsLearned:(i*2)%25, streak:(i*5)%30, createdAt:new Date(Date.now()-i*86400000*6).toISOString() });
+  }
+  return users;
+}
+function seedSkills(users){
+  const skills = [];
+  SKILL_POOL.forEach(([name,category], idx) => {
+    const teacher = users[idx % users.length];
+    skills.push({ id:uid("sk"), name, category, teacherId:teacher.id, level:["Beginner","Intermediate","Advanced"][idx%3],
+      description:`A hands-on, project-based introduction to ${name}. Learn practical fundamentals directly from a peer who has real experience teaching and applying it.`,
+      whatYouLearn:[`Core concepts behind ${name}`,`Practical exercises to build real confidence`,`Common mistakes and how to avoid them`,`A small project to apply what you learn`],
+      format: idx%3===0?"1-on-1":idx%3===1?"Small group":"1-on-1", duration:[30,45,60,90][idx%4], price:[25,30,40,50,60,75][idx%6],
+      rating:(4.1+(idx%9)*0.1).toFixed(1), studentsCount:8+((idx*13)%140), topics:[`${name} basics`,"Hands-on practice","Q&A + feedback"],
+      createdAt:new Date(Date.now()-idx*55000000).toISOString(), active:true });
+  });
+  return skills;
+}
+function seedBookings(users, skills){
+  const bookings = []; const statuses = ["upcoming","completed","completed","completed","cancelled"];
+  for (let i=0;i<15;i++){
+    const skill = skills[i % skills.length];
+    let student = users[(i+4)%users.length]; if (student.id === skill.teacherId) student = users[(i+5)%users.length];
+    const status = statuses[i%statuses.length]; const dayOffset = status==="upcoming"?2+i:-(2+i);
+    bookings.push({ id:uid("bk"), skillId:skill.id, teacherId:skill.teacherId, studentId:student.id,
+      date:new Date(Date.now()+dayOffset*86400000).toISOString().slice(0,10), time:["09:00","11:30","14:00","16:30","19:00"][i%5],
+      duration:skill.duration, credits:skill.price, status, createdAt:new Date(Date.now()-i*90000000).toISOString() });
+  }
+  return bookings;
+}
+function seedTransactions(users, bookings, skills){
+  const tx = [];
+  users.forEach(u => tx.push({ id:uid("tx"), userId:u.id, amount:100, type:"WELCOME_BONUS", description:"Welcome to SkillSwap", createdAt:u.createdAt }));
+  bookings.filter(b=>b.status==="completed").forEach(b=>{
+    const skill = skills.find(s=>s.id===b.skillId);
+    tx.push({ id:uid("tx"), userId:b.studentId, amount:-b.credits, type:"SESSION_PAYMENT", description:`${skill?.name||"Session"} learning session`, bookingId:b.id, createdAt:b.createdAt });
+    tx.push({ id:uid("tx"), userId:b.teacherId, amount:b.credits, type:"TEACHING_REWARD", description:`${skill?.name||"Session"} teaching session`, bookingId:b.id, createdAt:b.createdAt });
+  });
+  return tx;
+}
+const ACHIEVEMENTS = [
+  { id:"first_swap", name:"First Skill Swap", desc:"Complete your first session as a learner", icon:"sparkles", check:(u,ctx)=>ctx.completedLearned>=1 },
+  { id:"streak_7", name:"7-Day Learning Streak", desc:"Keep a 7-day learning streak", icon:"flame", check:(u)=>u.streak>=7 },
+  { id:"top_teacher", name:"Top Teacher", desc:"Teach 10 sessions", icon:"trophy", check:(u,ctx)=>ctx.completedTaught>=10 },
+  { id:"fast_learner", name:"Fast Learner", desc:"Complete 5 learning sessions", icon:"graduation-cap", check:(u,ctx)=>ctx.completedLearned>=5 },
+  { id:"knowledge_sharer", name:"Knowledge Sharer", desc:"Publish 3 skills to teach", icon:"book-open", check:(u,ctx)=>ctx.skillsPublished>=3 },
+  { id:"community_builder", name:"Community Builder", desc:"Create 5 community posts", icon:"users", check:(u,ctx)=>ctx.postsCreated>=5 },
+];
+function seedPosts(users){
+  const contents = [
+    { c:"Just wrapped up my 10th Python teaching session! Nothing beats watching someone go from 'what's a for loop' to shipping their first script.", cat:"Achievement" },
+    { c:"Anyone have tips for practicing UI/UX critique feedback? I want to get better at articulating why something works, not just that it does.", cat:"Question" },
+    { c:"Pro tip: if you're learning a new language, teach a tiny bit of vocabulary back to your tutor in your native language. It flips the power dynamic and makes sessions way more fun.", cat:"Tip" },
+    { c:"Finished my first data viz project using skills from my SkillSwap Excel sessions. Swapped my guitar lessons for it — feels like a fair trade.", cat:"Project" },
+    { c:"If you're on the fence about teaching something you 'only kind of know' — do it anyway. Teaching Figma basics taught ME more than watching tutorials ever did.", cat:"Tip" },
+    { c:"Looking for someone to practice conversational Spanish with twice a week. Beginner-friendly please! Happy to trade JavaScript help.", cat:"Skill Recommendation" },
+    { c:"Hit a 14-day streak today. The trick that worked for me: booking sessions for the same time every day so it becomes automatic.", cat:"Achievement" },
+    { c:"Ran my first small-group photography session this weekend — three students, one park, lots of terrible-then-great photos. 10/10 would teach again.", cat:"Project" },
+  ];
+  return contents.map((p,i)=>({ id:uid("post"), userId:users[(i*3)%users.length].id, content:p.c, category:p.cat,
+    likes: users.slice(0,(i*7)%12).map(u=>u.id), createdAt:new Date(Date.now()-i*5400000).toISOString() }));
+}
+function seedComments(users, posts){
+  const lines = ["This is so real 😂","Love this, saving it for later.","How did you find the time for this??","Sending you a message about this!","Same experience here, glad it's not just me.","Great tip, trying this today."];
+  const comments = [];
+  posts.slice(0,6).forEach((p,i)=>{ for(let c=0;c<(i%3)+1;c++){ comments.push({ id:uid("cm"), postId:p.id, userId:users[(i+c+2)%users.length].id, content:lines[(i+c)%lines.length], createdAt:new Date(Date.now()-(i+c)*3200000).toISOString() }); } });
+  return comments;
+}
+function seedNotifications(userId, users, skills){
+  const templates = [
+    { text:"Your session starts in 30 minutes.", type:"session" },
+    { text:"You received 50 Skill Credits.", type:"credit" },
+    { text:`${users[3]?.name} booked your ${skills[0]?.name} session.`, type:"booking" },
+    { text:"You earned the Fast Learner achievement.", type:"achievement" },
+    { text:`${users[6]?.name} sent you a message.`, type:"message" },
+    { text:`${users[8]?.name} liked your post.`, type:"community" },
+    { text:"Your streak is at risk — book a session today to keep it alive.", type:"streak" },
+    { text:`New skill added in Design: "Product Design".`, type:"system" },
+    { text:`${users[11]?.name} commented on your post.`, type:"community" },
+    { text:"Welcome to SkillSwap! Explore skills to get started.", type:"system" },
+  ];
+  return templates.map((t,i)=>({ id:uid("ntf"), userId, text:t.text, type:t.type, read:i>4, createdAt:new Date(Date.now()-i*2600000).toISOString() }));
+}
+function seedConversations(users, currentUserId){
+  const partners = users.slice(0,10); const convos=[]; const messages=[];
+  const openers = ["Hey! Saw your Python skill — is Thursday evening open?","Thanks again for the session, that really clicked for me!","Quick question about the homework you mentioned.","Are you still offering the UI/UX beginner track?","Loved the last session, want to book another one?"];
+  partners.forEach((p,i)=>{
+    const cid = uid("cv");
+    convos.push({ id:cid, members:[currentUserId,p.id], updatedAt:new Date(Date.now()-i*4100000).toISOString() });
+    messages.push({ id:uid("msg"), conversationId:cid, senderId:p.id, content:openers[i%openers.length], createdAt:new Date(Date.now()-i*4100000-600000).toISOString() });
+    if (i%2===0) messages.push({ id:uid("msg"), conversationId:cid, senderId:currentUserId, content:"Yes, that works for me! Let's lock it in.", createdAt:new Date(Date.now()-i*4100000-200000).toISOString() });
+  });
+  return { convos, messages };
+}
+function buildInitialDB(){
+  const users = seedUsers();
+  const skills = seedSkills(users);
+  const bookings = seedBookings(users, skills);
+  const transactions = seedTransactions(users, bookings, skills);
+  const demoUser = { id:uid("u"), name:"Alex Rivera", username:"alexrivera", email:"demo@skillswap.app",
+    avatarColor:hueFor("Alex Rivera"), university:"Stanford University", mobile:"",
+    about:"Computer science student who loves building things and teaching Python. Currently interested in UI/UX and public speaking.",
+    teachSkills:[{name:"Python Programming", level:"Advanced", years:3},{name:"Excel for Analysis", level:"Intermediate", years:2}],
+    learnSkills:[{name:"UI/UX Design"},{name:"Public Speaking"}], credits:100, rating:"4.9", sessionsTaught:12, sessionsLearned:8, streak:14,
+    createdAt:new Date(Date.now()-40*86400000).toISOString() };
+  users.unshift(demoUser);
+  transactions.unshift({ id:uid("tx"), userId:demoUser.id, amount:100, type:"WELCOME_BONUS", description:"Welcome to SkillSwap", createdAt:demoUser.createdAt });
+  const posts = seedPosts(users);
+  const comments = seedComments(users, posts);
+  const notifications = seedNotifications(demoUser.id, users, skills);
+  const { convos, messages } = seedConversations(users, demoUser.id);
+  const userAchievements = [
+    { userId:demoUser.id, achievementId:"first_swap", unlockedAt:demoUser.createdAt },
+    { userId:demoUser.id, achievementId:"streak_7", unlockedAt:demoUser.createdAt },
+    { userId:demoUser.id, achievementId:"knowledge_sharer", unlockedAt:demoUser.createdAt },
+  ];
+  return { version:1, currentUserId:null, users, skills, bookings, transactions, posts, comments, notifications, conversations:convos, messages, userAchievements };
+}
+const DB_KEY = "skillswap_db_v1";
+let CLOUD_READY = false, CLOUD_SAVE_TIMER, CLOUD_SAVE_QUEUE = Promise.resolve();
+function loadDB(){
+  try{ const raw = localStorage.getItem(DB_KEY); if (raw) return JSON.parse(raw); } catch(e){}
+  const fresh = buildInitialDB(); localStorage.setItem(DB_KEY, JSON.stringify(fresh)); return fresh;
+}
+function saveDB(){
+  const snapshot=JSON.stringify(DB); localStorage.setItem(DB_KEY,snapshot);
+  if(!CLOUD_READY || !ssClient || !DB.currentUserId) return;
+  const userId=DB.currentUserId, data=JSON.parse(snapshot);
+  clearTimeout(CLOUD_SAVE_TIMER);
+  CLOUD_SAVE_TIMER=setTimeout(()=>{
+    CLOUD_SAVE_QUEUE=CLOUD_SAVE_QUEUE.then(async()=>{
+      const {error}=await ssClient.from("account_data").upsert({user_id:userId,data,updated_at:nowISO()});
+      if(error) toast("Could not sync account data: "+error.message,"error");
+    }).catch(e=>toast("Could not sync account data: "+e.message,"error"));
+  },500);
+}
+
+/* ------------------------------- GLOBAL STATE ------------------------------- */
+let DB = loadDB();
+let TOASTS = [];
+let UI = {
+  discover: { search:"", category:"", level:"", maxCredits:100, minRating:0, format:"", sort:"Recommended", showFilters:false },
+  book: { open:false, skillId:null, date:new Date(Date.now()+86400000).toISOString().slice(0,10), time:"14:00", step:"form" },
+  compose: { open:false, content:"", category:"Tip" },
+  settingsTab: "profile",
+  sessionsTab: "upcoming",
+  leaderboardTab: "All Time",
+  showComments: {},
+  commentDraft: {},
+  messagesActiveId: null,
+  commandOpen: false,
+  commandQuery: "",
+  drawerOpen: false,
+  onboarding: { step:1, teach:[], learn:[], level:"Beginner", about:"", university:"", mobile:"" },
+  loginForm: { email:"", password:"", error:"", loading:false },
+  signupForm: { name:"", email:"", password:"", mobile:"", university:"", error:"", loading:false },
+  profileEdit: null,
+  newTeach: "", newLevel: "Beginner", newLearn: "",
+  security: { cur:"", n1:"", n2:"", err:"" },
+  notifPrefs: { sessions:true, credits:true, community:true, messages:true, marketing:false },
+  privacy: { pub:true },
+};
+
+function currentUser(){ return DB.users.find(u => u.id === DB.currentUserId) || null; }
+const ssClient = window.supabase?.createClient && window.SKILLSWAP_SUPABASE_URL && window.SKILLSWAP_SUPABASE_ANON_KEY
+  ? window.supabase.createClient(window.SKILLSWAP_SUPABASE_URL, window.SKILLSWAP_SUPABASE_ANON_KEY) : null;
+async function syncProfile(user){
+  const { data, error } = await ssClient.from("profiles").select("*").eq("id", user.id).maybeSingle();
+  if(error) throw error;
+  const profile = data || { id:user.id, email:user.email, name:user.user_metadata.name || "", username:(user.user_metadata.name || "student").toLowerCase().replace(/[^a-z0-9]/g,"").slice(0,14) + Math.floor(Math.random()*900+100), mobile:"", university:"", avatar_color:"#7C3AED", about:"", teach_skills:[], learn_skills:[], credits:100, created_at:nowISO() };
+  if(!data){ const { error:saveError } = await ssClient.from("profiles").insert(profile); if(saveError) throw saveError; }
+  const local = { id:user.id, email:user.email, name:profile.name, username:profile.username, mobile:profile.mobile||"", university:profile.university||"", avatarColor:profile.avatar_color||"#7C3AED", about:profile.about||"", teachSkills:profile.teach_skills||[], learnSkills:profile.learn_skills||[], credits:profile.credits??100, rating:"—", sessionsTaught:0, sessionsLearned:0, streak:0, createdAt:profile.created_at||nowISO() };
+  const index=DB.users.findIndex(u=>u.id===user.id); if(index<0) DB.users.push(local); else DB.users[index]={...DB.users[index],...local};
+  DB.currentUserId=user.id;
+  const {data:accountData,error:accountError}=await ssClient.from("account_data").select("data").eq("user_id",user.id).maybeSingle();
+  if(accountError) throw accountError;
+  if(accountData?.data){ DB=accountData.data; DB.currentUserId=user.id; }
+  const restoredUser=DB.users.findIndex(u=>u.id===user.id);
+  if(restoredUser<0) DB.users.push(local); else DB.users[restoredUser]={...DB.users[restoredUser],...local};
+  CLOUD_READY=true; render();
+}
+async function saveProfileToServer(){
+  const u=currentUser(); if(!u || !ssClient) return;
+  const { error }=await ssClient.from("profiles").upsert({id:u.id,email:u.email,name:u.name,username:u.username,mobile:u.mobile,university:u.university,avatar_color:u.avatarColor,about:u.about,teach_skills:u.teachSkills,learn_skills:u.learnSkills,credits:u.credits});
+  if(error) toast("Profile saved here, but server sync failed: "+error.message,"error");
+}
+function userCtx(userId){
+  const completedTaught = DB.bookings.filter(b=>b.teacherId===userId && b.status==="completed").length;
+  const completedLearned = DB.bookings.filter(b=>b.studentId===userId && b.status==="completed").length;
+  const skillsPublished = DB.skills.filter(s=>s.teacherId===userId).length;
+  const postsCreated = DB.posts.filter(p=>p.userId===userId).length;
+  return { completedTaught, completedLearned, skillsPublished, postsCreated };
+}
+function checkAchievements(userId){
+  const user = DB.users.find(u=>u.id===userId); if (!user) return;
+  const ctx = userCtx(userId);
+  ACHIEVEMENTS.forEach(a=>{
+    const already = DB.userAchievements.find(ua=>ua.userId===userId && ua.achievementId===a.id);
+    if (!already && a.check(user, ctx)){
+      DB.userAchievements.push({ userId, achievementId:a.id, unlockedAt:nowISO() });
+      DB.notifications.unshift({ id:uid("ntf"), userId, text:`You earned ${a.name}.`, type:"achievement", read:false, createdAt:nowISO() });
+    }
+  });
+}
+
+/* ---------------------------------- TOASTS ---------------------------------- */
+function toast(message, tone="success"){
+  const id = uid("toast");
+  TOASTS.push({ id, message, tone });
+  renderToasts();
+  setTimeout(()=>{ TOASTS = TOASTS.filter(t=>t.id!==id); renderToasts(); }, 3800);
+}
+function dismissToast(id){ TOASTS = TOASTS.filter(t=>t.id!==id); renderToasts(); }
+function renderToasts(){
+  const host = document.getElementById("toast-host");
+  host.innerHTML = TOASTS.map(t => `
+    <div class="toast-in rounded-xl border border-white/10 bg-[#12121c]/95 backdrop-blur-xl shadow-2xl shadow-black/40 px-4 py-3 flex items-start gap-3">
+      <div class="mt-0.5 h-6 w-6 shrink-0 rounded-full flex items-center justify-center ${t.tone==="error"?"bg-rose-500/15 text-rose-400":t.tone==="info"?"bg-cyan-500/15 text-cyan-300":"bg-emerald-500/15 text-emerald-400"}">
+        <i data-lucide="${t.tone==="error"?"x-circle":t.tone==="info"?"alert-circle":"check-circle-2"}" class="w-3.5 h-3.5"></i>
+      </div>
+      <div class="flex-1 min-w-0"><p class="text-sm text-white/90 leading-snug">${esc(t.message)}</p></div>
+      <button onclick="dismissToast('${t.id}')" class="text-white/30 hover:text-white/70 transition-colors"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+    </div>`).join("");
+  icons();
+}
+
+/* --------------------------------- ROUTER ----------------------------------- */
+function parseHash(){
+  const raw = window.location.hash.replace(/^#\/?/, "") || "";
+  const [path, query] = raw.split("?");
+  const parts = path.split("/").filter(Boolean);
+  const params = new URLSearchParams(query || "");
+  return { parts, params };
+}
+function nav(path){ window.location.hash = path; }
+window.addEventListener("hashchange", () => {
+  render(); window.scrollTo(0,0);
+  if(!document.querySelector(".ss-intro")) revealHomeHero();
+});
+
+/* ---------------------------------- ICONS ------------------------------------ */
+function icons(){ if (window.lucide) lucide.createIcons(); }
+
+/* --------------------------------- UI ATOMS ---------------------------------- */
+function logoHTML(withWord=true, size=22){
+  return `<div class="flex items-center gap-2 select-none">
+    <svg width="${size}" height="${size}" viewBox="0 0 32 32" fill="none">
+      <circle cx="10" cy="10" r="5.2" fill="url(#g1)"/><circle cx="22" cy="22" r="5.2" fill="url(#g2)"/>
+      <path d="M13.6 13.6L18.4 18.4" stroke="url(#g3)" stroke-width="2" stroke-linecap="round"/>
+      <defs>
+        <linearGradient id="g1" x1="4.8" y1="4.8" x2="15.2" y2="15.2"><stop stop-color="#7C3AED"/><stop offset="1" stop-color="#6366F1"/></linearGradient>
+        <linearGradient id="g2" x1="16.8" y1="16.8" x2="27.2" y2="27.2"><stop stop-color="#22D3EE"/><stop offset="1" stop-color="#6366F1"/></linearGradient>
+        <linearGradient id="g3" x1="13.6" y1="13.6" x2="18.4" y2="18.4"><stop stop-color="#A78BFA"/><stop offset="1" stop-color="#67E8F9"/></linearGradient>
+      </defs>
+    </svg>${withWord?`<span class="font-display font-semibold tracking-tight text-white text-[17px]">SkillSwap</span>`:""}</div>`;
+}
+function avatarHTML(user, size=40){
+  if (!user) return `<div class="rounded-full bg-white/10" style="width:${size}px;height:${size}px"></div>`;
+  return `<div class="rounded-full flex items-center justify-center font-semibold text-white shrink-0" style="width:${size}px;height:${size}px;font-size:${size*0.38}px;background-color:${user.avatarColor||"#7C3AED"}">${initials(user.name)}</div>`;
+}
+function badgeHTML(text, tone="default", extra=""){
+  const tones = { default:"bg-white/[0.06] text-white/70 border-white/10", violet:"bg-violet-500/10 text-violet-300 border-violet-500/20",
+    cyan:"bg-cyan-500/10 text-cyan-300 border-cyan-500/20", emerald:"bg-emerald-500/10 text-emerald-300 border-emerald-500/20",
+    amber:"bg-amber-500/10 text-amber-300 border-amber-500/20", rose:"bg-rose-500/10 text-rose-300 border-rose-500/20" };
+  return `<span class="ss-badge ${tones[tone]} ${extra}">${esc(text)}</span>`;
+}
+function btn({label, variant="primary", size="md", icon="", iconRight="", onclick="", extra="", type="button", disabled=false, id=""}){
+  const sizes = { sm:"text-[13px] px-3 py-1.5", md:"text-sm px-4 py-2.5", lg:"text-[15px] px-6 py-3" };
+  const variants = { primary:"ss-btn-primary", secondary:"ss-btn-secondary", ghost:"ss-btn-ghost", outline:"border border-white/15 text-white hover:bg-white/[0.06]", danger:"ss-btn-danger" };
+  return `<button ${id?`id="${id}"`:""} type="${type}" ${onclick?`onclick="${onclick}"`:""} ${disabled?"disabled":""} class="ss-btn ${sizes[size]} ${variants[variant]} ${extra}">
+    ${icon?`<i data-lucide="${icon}" class="w-4 h-4 shrink-0"></i>`:""}${esc(label)}${iconRight?`<i data-lucide="${iconRight}" class="w-4 h-4 shrink-0"></i>`:""}</button>`;
+}
+function emptyState(icon, title, text, actionHTML=""){
+  return `<div class="flex flex-col items-center justify-center text-center py-16 px-6">
+    <div class="h-14 w-14 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-center mb-4"><i data-lucide="${icon}" class="w-5 h-5 text-violet-300"></i></div>
+    <h3 class="font-display text-lg font-semibold text-white mb-1.5">${esc(title)}</h3>
+    <p class="text-sm text-white/45 max-w-sm mb-5">${esc(text)}</p>${actionHTML}</div>`;
+}
+function bgLayer(){
+  let dots = "";
+  const positions = [[8,15],[85,10],[15,80],[90,70],[45,90],[70,25],[25,45],[60,60]];
+  positions.forEach((p,i)=>{ dots += `<span class="ss-dot" style="left:${p[0]}%; top:${p[1]}%; animation-delay:${i*0.6}s;"></span>`; });
+  return `<div class="ss-bg"><div class="ss-orb-field" aria-hidden="true"><span class="ss-orb ss-orb-violet"></span><span class="ss-orb ss-orb-cyan"></span><span class="ss-orb ss-orb-indigo"></span></div><canvas class="ss-orbit-canvas" aria-hidden="true"></canvas><div class="ss-grid"></div><div class="ss-glow"></div><div class="ss-dots">${dots}</div></div>`;
+}
+function fieldHTML(label, innerHTML, {hint="", required=false}={}){
+  return `<label class="block"><div class="flex items-baseline justify-between mb-1.5">
+    <span class="text-[13px] font-medium text-white/80">${esc(label)}${required?`<span class="text-violet-400"> *</span>`:""}</span>
+    ${hint?`<span class="text-[11px] text-white/35">${esc(hint)}</span>`:""}</div>${innerHTML}</label>`;
+}
+
+/* ================================ ROUTER DISPATCH ============================= */
+function Router(){
+  const { parts } = parseHash();
+  const path = parts[0] || "";
+  const PUBLIC_ONLY = ["login","signup"];
+  const PROTECTED = ["dashboard","onboarding","discover","skills","teach","my-skills","sessions","credits","leaderboard","community","messages","notifications","settings"];
+  const cu = currentUser();
+
+  if (PROTECTED.includes(path) && !cu) return LoginPage();
+  if (PUBLIC_ONLY.includes(path) && cu) { nav("dashboard"); return ""; }
+
+  switch(path){
+    case "": return LandingPage();
+    case "login": return LoginPage();
+    case "signup": return SignupPage();
+    case "onboarding": return OnboardingPage();
+    case "dashboard": return AppLayout(DashboardPage());
+    case "discover": return AppLayout(DiscoverPage());
+    case "skills": return AppLayout(SkillDetailPage(parts[1]));
+    case "teach": return AppLayout(TeachPage());
+    case "my-skills": return AppLayout(MySkillsPage());
+    case "sessions": return AppLayout(SessionsPage());
+    case "credits": return AppLayout(CreditsPage());
+    case "leaderboard": return AppLayout(LeaderboardPage());
+    case "community": return AppLayout(CommunityPage());
+    case "messages": return AppLayout(MessagesPage(parts[1]));
+    case "notifications": return AppLayout(NotificationsPage());
+    case "profile": return cu ? AppLayout(ProfilePage(parts[1])) : PublicShell(ProfilePage(parts[1]));
+    case "settings": return AppLayout(SettingsPage());
+    default: return NotFoundPage();
+  }
+}
+
+let REVEAL_OBSERVER, ASCII_CANVAS=null, ASCII_CONTEXT=null, ASCII_FRAME=0, ASCII_SIZE="", ASCII_LAST_DRAW=0;
+const WAVE_MOUSE={x:0,y:0,originX:0,originY:0,energy:0,lastImpulse:0};
+function drawOceanWaves(ctx,w,h,time){
+  const phase=time*.00082, age=time-WAVE_MOUSE.lastImpulse;
+  const energy=WAVE_MOUSE.energy*Math.exp(-Math.max(age,0)/1050);
+  ctx.save(); ctx.lineWidth=1.1; ctx.lineJoin="round"; ctx.lineCap="round";
+  for(let offset=-h;offset<w;offset+=62){
+    ctx.beginPath(); let started=false;
+    for(let x=-h;x<=w+h;x+=24){
+      const base=x+offset, along=x+base;
+      const swell=Math.sin(along*.009-phase)*27+Math.sin(along*.021-phase*1.55)*10+Math.sin(along*.0038-phase*.52)*17;
+      let ripple=0;
+      if(energy>.015){ const dx=x-WAVE_MOUSE.originX,dy=base-WAVE_MOUSE.originY,dist=Math.hypot(dx,dy); if(dist<650) ripple=energy*Math.sin(dist*.052-age*.022)*Math.exp(-dist/270)*42; }
+      const y=base+swell+ripple;
+      if(!started){ctx.moveTo(x,y);started=true;}else ctx.lineTo(x,y);
+    }
+    const crest=Math.abs(Math.round(offset/62))%3===0;
+    ctx.strokeStyle=crest?"rgba(196,181,253,.5)":"rgba(139,92,246,.32)";
+    ctx.globalAlpha=crest?.78:.62;
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+function drawAsciiOrbit(time=0){
+  const canvas=ASCII_CANVAS, ctx=ASCII_CONTEXT;
+  if(!canvas || !ctx || !canvas.isConnected) return;
+  const rect=canvas.getBoundingClientRect(), dpr=Math.min(window.devicePixelRatio||1,1);
+  const size=`${Math.round(rect.width*dpr)}x${Math.round(rect.height*dpr)}@${dpr}`;
+  if(size!==ASCII_SIZE){ canvas.width=Math.round(rect.width*dpr); canvas.height=Math.round(rect.height*dpr); ASCII_SIZE=size; }
+  ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,rect.width,rect.height);
+  const w=rect.width,h=rect.height,r=Math.min(w*.3,h*.36,360),cx=w*.75,cy=h*.48,angle=time*Math.PI*2/48000;
+  drawOceanWaves(ctx,w,h,time);
+  const cos=Math.cos(angle),sin=Math.sin(angle),glyphs=" .:-=+*#%@";
+  ctx.font="10px 'Courier New',monospace"; ctx.textAlign="center"; ctx.textBaseline="middle";
+  for(let y=-r;y<=r;y+=18) for(let x=-r;x<=r;x+=15){
+    const nx=x/r,ny=y/r,d=nx*nx+ny*ny; if(d>=1) continue;
+    const nz=Math.sqrt(1-d),rx=nx*cos-nz*sin,rz=nx*sin+nz*cos;
+    const light=Math.max(0,-rx*.32-ny*.2+rz*.92);
+    const bands=.5+.5*Math.sin(Math.asin(ny)*17+angle*.5);
+    const texture=.5+.5*Math.sin(Math.atan2(rx,rz)*18+ny*23+angle*1.7);
+    const shade=light*.57+bands*.2+texture*.2; if(shade<.1) continue;
+    const glyph=glyphs[Math.min(glyphs.length-1,Math.floor(shade*(glyphs.length-1)))];
+    ctx.fillStyle=rx>.18?`rgba(103,232,249,${.3+shade*.46})`:`rgba(196,181,253,${.3+shade*.46})`;
+    ctx.fillText(glyph,cx+x,cy+y);
+  }
+}
+function animateAsciiOrbit(time){
+  if(!ASCII_CANVAS || !ASCII_CANVAS.isConnected){ ASCII_FRAME=0; return; }
+  const frameInterval=window.innerWidth<640?110:80;
+  if(time-ASCII_LAST_DRAW>=frameInterval){ drawAsciiOrbit(time); ASCII_LAST_DRAW=time; }
+  ASCII_FRAME=requestAnimationFrame(animateAsciiOrbit);
+}
+function initAsciiOrbit(){
+  const canvas=document.querySelector(".ss-orbit-canvas");
+  if(canvas!==ASCII_CANVAS){ ASCII_CANVAS=canvas; ASCII_CONTEXT=canvas?.getContext("2d")||null; ASCII_SIZE=""; }
+  if(!canvas || !ASCII_CONTEXT) return;
+  if(window.matchMedia("(prefers-reduced-motion: reduce)").matches){ drawAsciiOrbit(0); return; }
+  if(!ASCII_FRAME) ASCII_FRAME=requestAnimationFrame(animateAsciiOrbit);
+}
+function render(){
+  saveDB();
+  document.getElementById("app").innerHTML = Router();
+  icons();
+  renderToasts();
+  renderModals();
+  afterRender();
+  initAsciiOrbit();
+}
+function afterRender(){
+  if(REVEAL_OBSERVER) REVEAL_OBSERVER.disconnect();
+  const pending=document.querySelectorAll(".ss-reveal:not(.is-visible)");
+  if(!pending.length) return;
+  if(!("IntersectionObserver" in window) || window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+    pending.forEach(el=>el.classList.add("is-visible")); return;
+  }
+  REVEAL_OBSERVER=new IntersectionObserver(entries=>entries.forEach(entry=>{
+    if(entry.isIntersecting){ entry.target.classList.add("is-visible"); REVEAL_OBSERVER.unobserve(entry.target); }
+  }),{threshold:.12});
+  pending.forEach(el=>REVEAL_OBSERVER.observe(el));
+  document.querySelectorAll(".ss-reveal .ss-card-hover").forEach(el=>el.classList.add("ss-tilt"));
+}
+
+/* -------------------------------- PUBLIC SHELL -------------------------------- */
+function PublicShell(inner){
+  return `<div class="relative min-h-screen">${bgLayer()}${PublicNavbar()}<div class="relative pt-20">${inner}</div>${Footer()}</div>`;
+}
+function PublicNavbar(){
+  const cu = currentUser();
+  const links = [["Explore Skills","discover"],["How It Works",""],["Community","community"],["Leaderboard","leaderboard"]];
+  return `<header class="ss-public-header fixed top-0 inset-x-0 z-[100] bg-[#050509]/80 backdrop-blur-xl border-b border-white/[0.06]">
+    <div class="max-w-7xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
+      <button data-brand-target="true" onclick="nav('')">${logoHTML()}</button>
+      <nav class="hidden md:flex items-center gap-1">
+        ${links.map(([l,to])=>`<button onclick="nav('${to}')" class="px-3.5 py-2 text-[13.5px] text-white/60 hover:text-white transition-colors rounded-lg hover:bg-white/[0.05]">${esc(l)}</button>`).join("")}
+      </nav>
+      <div class="hidden md:flex items-center gap-2">
+        ${cu ? btn({label:"Dashboard", size:"sm", iconRight:"chevron-right", onclick:"nav('dashboard')"})
+             : `${btn({label:"Log In", variant:"ghost", size:"sm", onclick:"nav('login')"})}${btn({label:"Get Started", size:"sm", onclick:"nav('signup')"})}`}
+      </div>
+      <button class="md:hidden text-white/70" onclick="toggleMobileNav()"><i data-lucide="menu" class="w-6 h-6"></i></button>
+    </div>
+  </header>`;
+}
+function toggleMobileNav(){ nav('discover'); } // simplified mobile shortcut
+function Footer(){
+  const cols = [
+    { h:"Platform", items:[["Explore Skills","discover"],["Leaderboard","leaderboard"],["Community","community"]] },
+    { h:"Account", items:[["Log In","login"],["Get Started","signup"],["Settings","settings"]] },
+    { h:"Company", items:[["How It Works",""],["About",""],["Contact",""]] },
+  ];
+  return `<footer class="relative border-t border-white/[0.06] mt-24">
+    <div class="max-w-7xl mx-auto px-5 sm:px-8 py-14 grid grid-cols-2 md:grid-cols-5 gap-8">
+      <div class="col-span-2">${logoHTML()}<p class="text-sm text-white/40 mt-3 max-w-xs leading-relaxed">Knowledge is currency. SkillSwap lets students exchange skills instead of money.</p></div>
+      ${cols.map(col=>`<div><h4 class="text-xs font-semibold text-white/40 uppercase tracking-wide mb-3">${esc(col.h)}</h4>
+        <ul class="space-y-2.5">${col.items.map(([label,to])=>`<li><button onclick="nav('${to}')" class="text-sm text-white/55 hover:text-white transition-colors">${esc(label)}</button></li>`).join("")}</ul></div>`).join("")}
+    </div>
+    <div class="border-t border-white/[0.06] py-5 text-center text-xs text-white/30">© ${new Date().getFullYear()} SkillSwap. A hackathon project — demo data throughout.</div>
+  </footer>`;
+}
+
+/* ================================ LANDING PAGE ================================ */
+function skillCardHTML(skill){
+  const teacher = DB.users.find(u=>u.id===skill.teacherId);
+  return `<div class="ss-card ss-card-hover p-5 flex flex-col cursor-pointer" onclick="nav('skills/${skill.id}')">
+    <div class="flex items-start justify-between mb-3">${badgeHTML(skill.category,"violet")}
+      <div class="flex items-center gap-1 text-xs text-amber-400"><i data-lucide="star" class="w-3 h-3 fill-current"></i>${skill.rating}</div></div>
+    <h3 class="font-display font-semibold text-white text-[15px] mb-1 leading-snug">${esc(skill.name)}</h3>
+    <p class="text-xs text-white/40 mb-4 line-clamp-2">${esc(skill.description)}</p>
+    <div class="mt-auto flex items-center justify-between pt-3 border-t border-white/[0.06]">
+      <div class="flex items-center gap-2 min-w-0" onclick="event.stopPropagation(); nav('profile/${teacher?.username}')">
+        ${avatarHTML(teacher,24)}<span class="text-xs text-white/55 truncate">${esc(teacher?.name||"")}</span></div>
+      <span class="text-xs font-semibold text-cyan-300 whitespace-nowrap">${skill.price} credits</span></div></div>`;
+}
+function LandingPage(){
+  const stats = [["12,480+","Students"],["850+","Skills"],["31,200+","Skill Swaps"],["1.8M+","Credits Earned"]];
+  const steps = [["01","Share Your Skill","Tell students what you're good at.","sparkles"],["02","Earn Skill Credits","Teach others and earn credits.","wallet"],["03","Learn Something New","Spend credits learning from someone else.","graduation-cap"]];
+  const testimonials = [
+    { name:"Maya Chen", uni:"UC Berkeley", quote:"I taught three friends Python and used the credits to finally learn UI/UX from a design major down the hall. No money changed hands — just skills." },
+    { name:"Ravi Kapoor", uni:"IIT Bombay", quote:"Booking a session took two minutes. I had my first guitar lesson the same evening I signed up." },
+    { name:"Ines Costa", uni:"ETH Zürich", quote:"The credit system makes teaching feel worthwhile in a way that just volunteering never did." },
+  ];
+  return PublicShell(`
+    <section class="relative max-w-7xl mx-auto px-5 sm:px-8 pt-16 pb-28 text-center overflow-hidden">
+      <div class="relative ss-hero">
+        <div class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-1.5 text-[12.5px] text-white/60 mb-7">
+          <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Live · 12 students learning right now</div>
+        <h1 class="font-display text-[2.6rem] sm:text-6xl lg:text-[4.2rem] font-semibold tracking-tight leading-[1.05] max-w-4xl mx-auto"><span>Learn more.</span><br/><span class="ss-title-accent">Teach what you know.</span></h1>
+        <p class="mt-6 text-white/55 text-base sm:text-lg max-w-xl mx-auto leading-relaxed">SkillSwap lets students exchange knowledge without exchanging money. Teach your skills, earn Skill Credits, and use them to learn something new.</p>
+        <div class="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3">
+          ${btn({label:"Start Swapping Skills", size:"lg", iconRight:"arrow-right", onclick:"nav('signup')"})}
+          ${btn({label:"Explore Skills", size:"lg", variant:"secondary", onclick:"nav('discover')"})}
+        </div>
+        <p class="mt-4 text-xs text-white/30">Knowledge is currency.</p>
+      </div>
+    </section>
+    <section class="max-w-6xl mx-auto px-5 sm:px-8 -mt-8 pb-24 ss-reveal">
+      <div class="ss-card grid grid-cols-2 md:grid-cols-4 divide-x divide-white/[0.06] overflow-hidden">
+        ${stats.map(([n,l])=>`<div class="px-6 py-8 text-center"><div class="font-display text-2xl sm:text-3xl font-semibold bg-gradient-to-br from-white to-white/60 bg-clip-text text-transparent">${n}</div><div class="text-xs text-white/40 mt-1">${l}</div></div>`).join("")}
+      </div>
+      <p class="text-center text-[11px] text-white/25 mt-3">Demo figures for illustration — not live platform statistics.</p>
+    </section>
+    <section class="max-w-6xl mx-auto px-5 sm:px-8 py-20 ss-reveal">
+      <div class="text-center mb-14"><h2 class="font-display text-3xl sm:text-4xl font-semibold">How SkillSwap works</h2><p class="text-white/45 mt-3">Three steps from curious student to confident teacher.</p></div>
+      <div class="grid md:grid-cols-3 gap-6 relative">
+        ${steps.map(([n,t,d,icon])=>`<div class="ss-card ss-card-hover p-7 relative">
+          <div class="h-11 w-11 rounded-xl bg-gradient-to-br from-violet-600/20 to-cyan-400/10 border border-white/10 flex items-center justify-center mb-5"><i data-lucide="${icon}" class="w-[18px] h-[18px] text-violet-300"></i></div>
+          <div class="text-[11px] font-mono text-white/30 mb-1">${n}</div><h3 class="font-display text-lg font-semibold mb-1.5">${esc(t)}</h3><p class="text-sm text-white/45">${esc(d)}</p></div>`).join("")}
+      </div>
+    </section>
+    <section class="max-w-7xl mx-auto px-5 sm:px-8 py-20 ss-reveal">
+      <div class="flex items-end justify-between mb-8 flex-wrap gap-4">
+        <div><h2 class="font-display text-3xl sm:text-4xl font-semibold">Explore what's being shared</h2><p class="text-white/45 mt-2">A live snapshot of skills students are teaching right now.</p></div>
+        ${btn({label:"View all skills", variant:"secondary", size:"sm", iconRight:"arrow-right", onclick:"nav('discover')"})}
+      </div>
+      <div class="flex gap-2 flex-wrap mb-8">${CATEGORIES.slice(0,6).map(c=>badgeHTML(c)).join("")}</div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">${DB.skills.slice(0,6).map(skillCardHTML).join("")}</div>
+    </section>
+    <section class="max-w-6xl mx-auto px-5 sm:px-8 py-20 ss-reveal">
+      <h2 class="font-display text-3xl sm:text-4xl font-semibold text-center mb-12">Students are learning from each other.</h2>
+      <div class="grid md:grid-cols-3 gap-5">
+        ${testimonials.map(t=>`<div class="ss-card ss-card-hover p-6">
+          <div class="flex gap-0.5 mb-4 text-amber-400">${Array.from({length:5}).map(()=>`<i data-lucide="star" class="w-[13px] h-[13px] fill-current"></i>`).join("")}</div>
+          <p class="text-sm text-white/70 leading-relaxed mb-5">"${esc(t.quote)}"</p>
+          <div class="flex items-center gap-3">${avatarHTML({name:t.name, avatarColor:hueFor(t.name)},36)}
+            <div><div class="text-sm font-medium text-white">${esc(t.name)}</div><div class="text-xs text-white/40">${esc(t.uni)}</div></div></div></div>`).join("")}
+      </div>
+    </section>
+    <section class="max-w-5xl mx-auto px-5 sm:px-8 py-20 ss-reveal">
+      <div class="ss-card text-center px-8 py-16 relative overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_60%_80%_at_50%_100%,rgba(124,58,237,0.16),transparent_70%)]"></div>
+        <div class="relative"><h2 class="font-display text-3xl sm:text-4xl font-semibold mb-4">Your next skill is one swap away.</h2>
+          <p class="text-white/50 mb-8 max-w-md mx-auto">Teach what you know. Learn what you've always wanted to.</p>
+          ${btn({label:"Start Your SkillSwap", size:"lg", iconRight:"arrow-right", onclick:"nav('signup')"})}</div></div>
+    </section>`);
+}
+
+/* ================================ AUTH PAGES =================================== */
+function AuthShell(inner){
+  return `<div class="ss-auth-shell relative min-h-screen flex items-center justify-center px-5 py-10">${bgLayer()}
+    <div class="absolute top-6 left-6"><button data-brand-target="true" onclick="nav('')">${logoHTML()}</button></div>
+    <div class="w-full max-w-md relative">${inner}</div></div>`;
+}
+function passwordInputHTML(id, value, showStrength=false){
+  return `<div><div class="relative">
+    <input type="password" id="${id}" value="${esc(value)}" oninput="${id}_input(this.value)" placeholder="••••••••••" autocomplete="current-password" class="ss-input pr-10"/>
+    <button type="button" onclick="togglePw('${id}')" class="absolute right-3 top-1/2 -translate-y-1/2 text-white/35 hover:text-white/70"><i data-lucide="eye" class="w-4 h-4" id="${id}_icon"></i></button>
+  </div>${showStrength?`<div id="${id}_strength" class="mt-2"></div>`:""}</div>`;
+}
+function togglePw(id){ const el = document.getElementById(id); const icon = document.getElementById(id+"_icon");
+  if (el.type==="password"){ el.type="text"; icon.setAttribute("data-lucide","eye-off"); } else { el.type="password"; icon.setAttribute("data-lucide","eye"); } icons(); }
+function pwStrength(v){ let s=0; if(v.length>=8)s++; if(/[A-Z]/.test(v))s++; if(/[0-9]/.test(v))s++; if(/[^A-Za-z0-9]/.test(v))s++; return s; }
+function renderPwStrength(id, v){
+  const el = document.getElementById(id+"_strength"); if (!el) return;
+  if (!v){ el.innerHTML=""; return; }
+  const s = pwStrength(v); const labels=["Too short","Weak","Okay","Good","Strong"]; const colors=["bg-rose-500","bg-rose-500","bg-amber-500","bg-cyan-500","bg-emerald-500"];
+  el.innerHTML = `<div class="flex gap-1">${Array.from({length:4}).map((_,i)=>`<div class="h-1 flex-1 rounded-full ${i<s?colors[s]:"bg-white/10"}"></div>`).join("")}</div><p class="text-[11px] text-white/40 mt-1">${labels[s]}</p>`;
+}
+function login_password_input(v){ UI.loginForm.password = v; }
+function signup_password_input(v){ UI.signupForm.password = v; renderPwStrength("signup_password", v); }
+window.login_password_input_input = login_password_input;
+window.signup_password_input_input = signup_password_input;
+
+function LoginPage(){
+  const f = UI.loginForm;
+  return AuthShell(`<div class="ss-card p-8">
+    <h1 class="font-display text-2xl font-semibold mb-1.5">Welcome back.</h1>
+    <p class="text-sm text-white/45 mb-7">Continue your learning journey.</p>
+    <form onsubmit="return submitLogin(event)" class="space-y-4">
+      ${fieldHTML("Email", `<input type="email" autocomplete="email" value="${esc(f.email)}" oninput="UI.loginForm.email=this.value" placeholder="student@example.com" class="ss-input"/>`, {required:true})}
+      ${fieldHTML("Password", passwordInputHTML("login_password", f.password))}
+      ${f.error?`<p class="text-[13px] text-rose-400 flex items-center gap-1.5"><i data-lucide="alert-circle" class="w-[13px] h-[13px]"></i>${esc(f.error)}</p>`:""}
+      <div class="flex items-center justify-between text-[13px]">
+        <label class="flex items-center gap-2 text-white/50"><input type="checkbox" class="accent-violet-500"/> Remember me</label>
+        <button type="button" class="text-violet-300 hover:text-violet-200" onclick="UI.loginForm.error='Password reset is not set up yet.'; render()">Forgot password?</button>
+      </div>
+      ${btn({label: f.loading?"Logging in...":"Log In", type:"submit", size:"lg", extra:"w-full"})}
+    </form>
+    <p class="text-center text-sm text-white/40 mt-6">Don't have an account? <button onclick="nav('signup')" class="text-violet-300 hover:text-violet-200 font-medium">Sign up</button></p>
+  </div>`);
+}
+async function submitLogin(e){
+  e.preventDefault();
+  const f = UI.loginForm; f.error="";
+  if (!f.email || !f.password){ f.error="Enter your email and password."; render(); return false; }
+  if(!ssClient){ f.error="Connect Supabase first. See Skillswap/SUPABASE_SETUP.md."; render(); return false; }
+  f.loading=true; render();
+  const {data,error}=await ssClient.auth.signInWithPassword({email:f.email.trim(),password:f.password});
+  if(error){ f.loading=false; f.error=error.message; render(); return false; }
+  try{ await syncProfile(data.user); }
+  catch(err){ f.loading=false; f.error="Signed in, but profile could not load: "+err.message; render(); return false; }
+  const welcomeName=data.user.user_metadata.name||data.user.email;
+  UI.loginForm = { email:"", password:"", error:"", loading:false };
+  await playLoginPortalTransition();
+  toast(`Welcome back, ${welcomeName}.`);
+  return false;
+}
+async function playLoginPortalTransition(){
+  if(window.matchMedia("(prefers-reduced-motion: reduce)").matches){ nav("dashboard"); return; }
+  const overlay=document.createElement("div"); overlay.className="ss-login-transition";
+  const messageText="Every new skill begins with showing up.";
+  const chars=Array.from(messageText).map((char,index)=>`<span class="ss-login-char" style="--login-char-delay:${index*22}ms">${char===" "?"&nbsp;":esc(char)}</span>`).join("");
+  overlay.innerHTML=`<div class="ss-login-portal"></div><div class="ss-login-ripple"></div><div class="ss-login-ripple"></div><div class="ss-login-ripple"></div><h1 class="ss-login-message" aria-label="${messageText}">${chars}</h1>`;
+  document.body.append(overlay);
+  const portal=overlay.querySelector(".ss-login-portal"), message=overlay.querySelector(".ss-login-message");
+  requestAnimationFrame(()=>portal.classList.add("is-open"));
+  await new Promise(resolve=>setTimeout(resolve,1050));
+  overlay.querySelectorAll(".ss-login-ripple").forEach(ripple=>ripple.classList.add("is-rippling"));
+  await message.animate([
+    {opacity:1,transform:"translateY(0) scale(1)",filter:"blur(0)"},
+    {offset:.28,opacity:1,transform:"translateY(0) scale(1.04)",filter:"blur(0)"},
+    {opacity:0,transform:"translateY(-12px) scale(.025)",filter:"blur(8px)"}
+  ],{duration:650,easing:"cubic-bezier(.68,0,.24,1)",fill:"forwards"}).finished;
+  nav("dashboard");
+  await overlay.animate(
+    [{clipPath:"circle(150% at 50% 50%)"},{clipPath:"circle(0% at 50% 50%)"}],
+    {duration:760,easing:"cubic-bezier(.7,0,.2,1)",fill:"forwards"}
+  ).finished;
+  overlay.remove();
+}
+function SignupPage(){
+  const f = UI.signupForm;
+  return AuthShell(`<div class="ss-card p-8">
+    <h1 class="font-display text-2xl font-semibold mb-1.5">Create your account.</h1>
+    <p class="text-sm text-white/45 mb-7">Join SkillSwap and get 100 Skill Credits to start.</p>
+    <form onsubmit="return submitSignup(event)" class="space-y-4">
+      ${fieldHTML("Full name", `<input value="${esc(f.name)}" oninput="UI.signupForm.name=this.value" placeholder="Alex Rivera" class="ss-input"/>`, {required:true})}
+      ${fieldHTML("Email", `<input type="email" value="${esc(f.email)}" oninput="UI.signupForm.email=this.value" placeholder="student@example.com" class="ss-input"/>`, {required:true, hint:"Used to log in"})}
+      ${fieldHTML("Password", passwordInputHTML("signup_password", f.password, true))}
+      <div class="grid grid-cols-2 gap-3">
+        ${fieldHTML("University", `<input value="${esc(f.university)}" oninput="UI.signupForm.university=this.value" placeholder="Stanford University" class="ss-input"/>`, {hint:"Optional"})}
+        ${fieldHTML("Mobile number", `<input value="${esc(f.mobile)}" oninput="UI.signupForm.mobile=this.value" placeholder="+1 555 0100" class="ss-input"/>`, {hint:"Optional"})}
+      </div>
+      ${f.error?`<p class="text-[13px] text-rose-400 flex items-center gap-1.5"><i data-lucide="alert-circle" class="w-[13px] h-[13px]"></i>${esc(f.error)}</p>`:""}
+      ${btn({label:"Create Account", type:"submit", size:"lg", extra:"w-full"})}
+      <p class="text-[11px] text-white/30 text-center">Your account and SkillSwap activity are saved to your account so you can use them across devices.</p>
+    </form>
+    <p class="text-center text-sm text-white/40 mt-6">Already have an account? <button onclick="nav('login')" class="text-violet-300 hover:text-violet-200 font-medium">Log in</button></p>
+  </div>`);
+}
+async function submitSignup(e){
+  e.preventDefault();
+  const f = UI.signupForm; f.error="";
+  if (!f.name.trim()){ f.error="Full name is required."; render(); return false; }
+  if (!/^\S+@\S+\.\S+$/.test(f.email)){ f.error="Enter a valid email address."; render(); return false; }
+  if (f.password.length < 8){ f.error="Password must be at least 8 characters."; render(); return false; }
+  if(!ssClient){ f.error="Connect Supabase first. See Skillswap/SUPABASE_SETUP.md."; render(); return false; }
+  f.loading=true; render();
+  const {data,error}=await ssClient.auth.signUp({email:f.email.trim(),password:f.password,options:{data:{name:f.name.trim(),mobile:f.mobile,university:f.university}}});
+  if(error){ f.loading=false; f.error=error.message; render(); return false; }
+  if(data.session){
+    try{ await syncProfile(data.user); }
+    catch(err){ f.loading=false; f.error="Account created, but profile could not be saved: "+err.message; render(); return false; }
+    DB.transactions.unshift({id:uid("tx"),userId:data.user.id,amount:100,type:"WELCOME_BONUS",description:"Welcome to SkillSwap",createdAt:nowISO()});
+    DB.notifications.unshift({id:uid("ntf"),userId:data.user.id,text:"You received 100 Skill Credits. Welcome to SkillSwap!",type:"credit",read:false,createdAt:nowISO()});
+    toast("Account created — 100 Skill Credits added.");
+  } else { toast("Check your email to confirm your account, then log in.","info"); UI.signupForm = { name:"", email:"", password:"", mobile:"", university:"", error:"", loading:false }; nav("login"); return false; }
+  UI.signupForm = { name:"", email:"", password:"", mobile:"", university:"", error:"", loading:false };
+  nav("onboarding");
+  return false;
+}
+
+/* =============================== ONBOARDING ==================================== */
+function OnboardingPage(){
+  const cu = currentUser(); if (!cu) return LoginPage();
+  const o = UI.onboarding; const total = 5;
+  const suggestedTeach = ["Python","JavaScript","Graphic Design","Photography","Excel","Music","React","Public Speaking","Video Editing"];
+  const suggestedLearn = ["UI/UX Design","Public Speaking","Video Editing","Marketing","Languages","Data Science","Photography","Guitar"];
+
+  let stepHTML = "";
+  if (o.step===1){
+    stepHTML = `<div class="ss-card p-8">
+      <h1 class="font-display text-2xl font-semibold mb-2">What can you teach?</h1>
+      <p class="text-sm text-white/45 mb-6">Pick a few things you're confident helping others with.</p>
+      <div class="flex flex-wrap gap-2 mb-8">${suggestedTeach.map(s=>`<button onclick="onboardToggle('teach','${s}')" class="px-3.5 py-2 rounded-full text-sm border transition-colors ${o.teach.includes(s)?"bg-violet-500/20 border-violet-400/50 text-white":"border-white/10 text-white/60 hover:border-white/25"}">${s}</button>`).join("")}</div>
+      <div class="flex justify-between">${btn({label:"Skip", variant:"ghost", onclick:"UI.onboarding.step=2; render()"})}${btn({label:"Continue", iconRight:"arrow-right", disabled:o.teach.length===0, onclick:"UI.onboarding.step=2; render()"})}</div></div>`;
+  } else if (o.step===2){
+    stepHTML = `<div class="ss-card p-8">
+      <h1 class="font-display text-2xl font-semibold mb-2">What do you want to learn?</h1>
+      <p class="text-sm text-white/45 mb-6">We'll use this to recommend teachers and skills.</p>
+      <div class="flex flex-wrap gap-2 mb-8">${suggestedLearn.map(s=>`<button onclick="onboardToggle('learn','${s}')" class="px-3.5 py-2 rounded-full text-sm border transition-colors ${o.learn.includes(s)?"bg-cyan-500/15 border-cyan-400/50 text-white":"border-white/10 text-white/60 hover:border-white/25"}">${s}</button>`).join("")}</div>
+      <div class="flex justify-between">${btn({label:"Back", variant:"ghost", onclick:"UI.onboarding.step=1; render()"})}${btn({label:"Continue", iconRight:"arrow-right", disabled:o.learn.length===0, onclick:"UI.onboarding.step=3; render()"})}</div></div>`;
+  } else if (o.step===3){
+    stepHTML = `<div class="ss-card p-8">
+      <h1 class="font-display text-2xl font-semibold mb-2">What's your experience level?</h1>
+      <p class="text-sm text-white/45 mb-6">This helps us tailor your teaching profile.</p>
+      <div class="grid grid-cols-3 gap-3 mb-8">${["Beginner","Intermediate","Advanced"].map(l=>`<button onclick="UI.onboarding.level='${l}'; render()" class="py-4 rounded-xl border text-sm font-medium transition-colors ${o.level===l?"bg-violet-500/15 border-violet-400/50 text-white":"border-white/10 text-white/55 hover:border-white/25"}">${l}</button>`).join("")}</div>
+      <div class="flex justify-between">${btn({label:"Back", variant:"ghost", onclick:"UI.onboarding.step=2; render()"})}${btn({label:"Continue", iconRight:"arrow-right", onclick:"UI.onboarding.step=4; render()"})}</div></div>`;
+  } else if (o.step===4){
+    stepHTML = `<div class="ss-card p-8">
+      <h1 class="font-display text-2xl font-semibold mb-2">Complete your profile</h1>
+      <p class="text-sm text-white/45 mb-6">Optional — you can always add this later.</p>
+      <div class="space-y-4 mb-8">
+        ${fieldHTML("About", `<textarea rows="3" maxlength="280" oninput="UI.onboarding.about=this.value" class="ss-input resize-none" placeholder="Tell other students a bit about yourself...">${esc(o.about)}</textarea>`, {hint:"Optional"})}
+        <div class="grid grid-cols-2 gap-3">
+          ${fieldHTML("University", `<input value="${esc(o.university)}" oninput="UI.onboarding.university=this.value" class="ss-input"/>`, {hint:"Optional"})}
+          ${fieldHTML("Mobile", `<input value="${esc(o.mobile)}" oninput="UI.onboarding.mobile=this.value" class="ss-input"/>`, {hint:"Optional"})}
+        </div>
+        ${fieldHTML("Email", `<input value="${esc(cu.email)}" disabled class="ss-input opacity-60"/>`, {required:true})}
+      </div>
+      <div class="flex justify-between">${btn({label:"Back", variant:"ghost", onclick:"UI.onboarding.step=3; render()"})}${btn({label:"Finish Setup", iconRight:"arrow-right", onclick:"finishOnboarding()"})}</div></div>`;
+  } else {
+    stepHTML = `<div class="ss-card p-10 text-center">
+      <div class="h-16 w-16 rounded-2xl bg-gradient-to-br from-violet-600 to-cyan-400 flex items-center justify-center mx-auto mb-6"><i data-lucide="check" class="w-7 h-7"></i></div>
+      <h1 class="font-display text-2xl font-semibold mb-2">You're ready to start swapping skills.</h1>
+      <p class="text-white/50 mb-1">100 Skill Credits have been added to your account.</p>
+      <div class="my-6 inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-400/10 px-4 py-1.5 text-cyan-300 font-semibold"><i data-lucide="wallet" class="w-[15px] h-[15px]"></i>100 Skill Credits</div>
+      <div class="flex flex-col gap-2">${btn({label:"Explore Your First Skill", size:"lg", iconRight:"arrow-right", onclick:"nav('discover')"})}${btn({label:"Go to Dashboard", variant:"ghost", onclick:"nav('dashboard')"})}</div></div>`;
+  }
+  return `<div class="relative min-h-screen">${bgLayer()}<div class="relative max-w-xl mx-auto px-5 py-14">
+    <div class="flex items-center gap-2 mb-10">${Array.from({length:total}).map((_,i)=>`<div class="h-1 flex-1 rounded-full transition-colors ${i<o.step?"bg-gradient-to-r from-violet-500 to-cyan-400":"bg-white/10"}"></div>`).join("")}</div>
+    ${stepHTML}</div></div>`;
+}
+function onboardToggle(kind, item){ const list = UI.onboarding[kind]; const idx = list.indexOf(item); if (idx>=0) list.splice(idx,1); else list.push(item); render(); }
+function finishOnboarding(){
+  const cu = currentUser(); const o = UI.onboarding;
+  cu.teachSkills = o.teach.map(t=>({ name:t, level:o.level, years:o.level==="Advanced"?3:o.level==="Intermediate"?2:1 }));
+  cu.learnSkills = o.learn.map(l=>({ name:l }));
+  cu.about = o.about; cu.university = o.university; cu.mobile = o.mobile;
+  UI.onboarding.step = 5; saveProfileToServer(); render();
+}
+
+/* ================================ APP LAYOUT =================================== */
+const NAV_ITEMS = [["Dashboard","dashboard","layout-dashboard"],["Discover","discover","compass"],["My Skills","my-skills","book-open"],["Sessions","sessions","calendar"],["Credits","credits","wallet"],["Community","community","users"],["Leaderboard","leaderboard","trophy"],["Messages","messages","message-square"]];
+const MOBILE_NAV = [["Home","dashboard","home"],["Discover","discover","compass"],["Sessions","sessions","calendar"],["Messages","messages","message-square"],["Profile","settings","user"]];
+
+function AppLayout(innerHTML){
+  const cu = currentUser(); if (!cu) return LoginPage();
+  const { parts } = parseHash(); const path = parts[0];
+  const unread = DB.notifications.filter(n=>n.userId===cu.id && !n.read).length;
+
+  const sidebarNav = NAV_ITEMS.map(([label,to,icon])=>{
+    const active = path===to;
+    return `<button onclick="nav('${to}')" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-medium transition-colors ${active?"bg-violet-500/15 text-white":"text-white/50 hover:text-white hover:bg-white/[0.05]"}">
+      <i data-lucide="${icon}" class="w-[17px] h-[17px]"></i>${label}${to==="messages" && unread>0?`<span class="ml-auto h-2 w-2 rounded-full bg-cyan-400"></span>`:""}</button>`;
+  }).join("");
+
+  const drawer = UI.drawerOpen ? `<div class="fixed inset-0 z-[140] lg:hidden">
+    <div class="absolute inset-0 bg-black/70" onclick="UI.drawerOpen=false; render()"></div>
+    <div class="ss-mobile-drawer absolute left-0 top-0 bottom-0 w-72 bg-[#0a0a11] border-r border-white/10 p-5 modal-pop">
+      <div class="flex items-center justify-between mb-6">${logoHTML()}<button onclick="UI.drawerOpen=false; render()"><i data-lucide="x" class="w-5 h-5 text-white/50"></i></button></div>
+      <nav class="space-y-1">${[...NAV_ITEMS,["Teach a Skill","teach","plus"],["Notifications","notifications","bell"],["Settings","settings","settings"]].map(([label,to,icon])=>`<button onclick="UI.drawerOpen=false; nav('${to}')" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/60 hover:text-white hover:bg-white/[0.06]"><i data-lucide="${icon}" class="w-4 h-4"></i>${label}</button>`).join("")}
+      <button onclick="doLogout()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-rose-300 hover:bg-rose-500/10"><i data-lucide="log-out" class="w-4 h-4"></i>Log Out</button></nav>
+    </div></div>` : "";
+
+  return `<div class="relative min-h-screen">${bgLayer()}
+    <div class="flex">
+      <aside class="ss-app-sidebar hidden lg:flex flex-col w-64 shrink-0 h-screen sticky top-0 border-r border-white/[0.06] bg-[#050509]/60 backdrop-blur-xl px-4 py-5">
+        <button data-brand-target="true" onclick="nav('dashboard')" class="px-2 mb-7 text-left">${logoHTML()}</button>
+        <nav class="flex-1 space-y-1">${sidebarNav}</nav>
+        <div class="pt-4 border-t border-white/[0.06] space-y-1">
+          <button onclick="nav('teach')" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-medium text-violet-300 hover:bg-violet-500/10 transition-colors"><i data-lucide="plus" class="w-[17px] h-[17px]"></i>Teach a Skill</button>
+          <button onclick="nav('settings')" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-medium text-white/50 hover:text-white hover:bg-white/[0.05] transition-colors"><i data-lucide="settings" class="w-[17px] h-[17px]"></i>Settings</button>
+          <button onclick="doLogout()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-medium text-white/50 hover:text-rose-300 hover:bg-rose-500/10 transition-colors"><i data-lucide="log-out" class="w-[17px] h-[17px]"></i>Log Out</button>
+        </div>
+        <button onclick="nav('profile/${cu.username}')" class="mt-4 flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.03] p-2.5 hover:bg-white/[0.06] transition-colors text-left">
+          ${avatarHTML(cu,34)}<div class="min-w-0"><div class="text-[13px] font-medium text-white truncate">${esc(cu.name)}</div><div class="text-[11px] text-white/40 truncate">@${esc(cu.username)}</div></div></button>
+      </aside>
+      <div class="flex-1 min-w-0">
+        ${TopBar(unread)}
+        <main class="px-4 sm:px-6 lg:px-10 py-6 pb-24 lg:pb-10 max-w-7xl mx-auto">${innerHTML}</main>
+      </div>
+    </div>
+    ${drawer}
+    <nav class="ss-mobile-nav lg:hidden fixed bottom-0 inset-x-0 z-[90] bg-[#050509]/90 backdrop-blur-xl border-t border-white/[0.08] flex items-stretch">
+      ${MOBILE_NAV.map(([label,to,icon])=>`<button onclick="nav('${to}')" class="flex-1 flex flex-col items-center justify-center gap-1 py-2.5 text-[10.5px] ${path===to?"text-violet-300":"text-white/40"}"><i data-lucide="${icon}" class="w-[19px] h-[19px]"></i>${label}</button>`).join("")}
+    </nav>
+  </div>`;
+}
+async function doLogout(){ CLOUD_READY=false; if(ssClient) await ssClient.auth.signOut(); DB.currentUserId=null; UI.drawerOpen=false; nav(""); }
+function TopBar(unread){
+  const cu = currentUser();
+  return `<header class="ss-app-topbar sticky top-0 z-[80] bg-[#050509]/70 backdrop-blur-xl border-b border-white/[0.06] px-4 sm:px-6 lg:px-10 h-16 flex items-center justify-between gap-4">
+    <div class="flex items-center gap-3 min-w-0">
+      <button data-brand-target="true" class="lg:hidden text-white/60" onclick="UI.drawerOpen=true; render()"><i data-lucide="menu" class="w-[22px] h-[22px]"></i></button>
+      <button onclick="UI.commandOpen=true; render(); setTimeout(()=>document.getElementById('cmdInput')?.focus(),30)" class="hidden sm:flex items-center gap-2 text-sm text-white/35 bg-white/[0.04] border border-white/10 rounded-lg px-3.5 py-2 hover:border-white/20 transition-colors w-64">
+        <i data-lucide="search" class="w-[14px] h-[14px]"></i> Search skills, people...
+        <span class="ml-auto text-[10px] border border-white/10 rounded px-1.5 py-0.5 text-white/30">⌘K</span></button>
+    </div>
+    <div class="flex items-center gap-2 shrink-0">
+      <button onclick="UI.commandOpen=true; render()" class="sm:hidden text-white/60 p-2"><i data-lucide="search" class="w-[19px] h-[19px]"></i></button>
+      <button onclick="nav('notifications')" class="relative text-white/60 hover:text-white p-2 rounded-lg hover:bg-white/[0.06] transition-colors">
+        <i data-lucide="bell" class="w-[19px] h-[19px]"></i>${unread>0?`<span class="absolute top-1 right-1 h-2 w-2 rounded-full bg-cyan-400 ring-2 ring-[#050509]"></span>`:""}</button>
+      <button onclick="nav('credits')" class="hidden sm:flex items-center gap-1.5 text-sm font-medium bg-white/[0.05] border border-white/10 rounded-lg px-3 py-1.5 hover:border-cyan-400/40 transition-colors">
+        <i data-lucide="wallet" class="w-[14px] h-[14px] text-cyan-300"></i> ${cu?.credits ?? 0}</button>
+      <button onclick="nav('profile/${cu?.username}')">${avatarHTML(cu,32)}</button>
+    </div>
+  </header>`;
+}
+
+/* =============================== COMMAND PALETTE ================================ */
+function renderModals(){
+  const host = document.getElementById("modal-root");
+  let html = "";
+  if (UI.commandOpen) html += CommandPaletteHTML();
+  if (UI.book.open) html += BookingModalHTML();
+  if (UI.compose.open) html += ComposeModalHTML();
+  host.innerHTML = html;
+  icons();
+}
+function CommandPaletteHTML(){
+  const q = UI.commandQuery;
+  const skills = DB.skills.filter(s=>s.name.toLowerCase().includes(q.toLowerCase())).slice(0,5);
+  const users = DB.users.filter(u=>u.name.toLowerCase().includes(q.toLowerCase())).slice(0,4);
+  const categories = CATEGORIES.filter(c=>c.toLowerCase().includes(q.toLowerCase())).slice(0,4);
+  return `<div class="fixed inset-0 z-[200] flex items-start justify-center pt-24 px-4">
+    <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="UI.commandOpen=false; render()"></div>
+    <div class="relative w-full max-w-lg rounded-2xl border border-white/10 bg-[#0c0c14] shadow-2xl modal-pop overflow-hidden">
+      <div class="flex items-center gap-3 px-4 py-3 border-b border-white/[0.06]">
+        <i data-lucide="search" class="w-4 h-4 text-white/40"></i>
+        <input id="cmdInput" value="${esc(q)}" oninput="UI.commandQuery=this.value; renderModals()" placeholder="Search skills, people, categories..." class="flex-1 bg-transparent outline-none text-sm text-white placeholder:text-white/30"/>
+        <kbd class="text-[10px] text-white/30 border border-white/10 rounded px-1.5 py-0.5">ESC</kbd></div>
+      <div class="max-h-80 overflow-y-auto p-2">
+        ${!q?`<p class="text-xs text-white/30 px-3 py-2">Try "Python", "UI/UX", or a friend's name.</p>`:""}
+        ${skills.length?`<div class="mb-1"><p class="text-[10.5px] uppercase tracking-wide text-white/30 px-3 py-1.5">Skills</p>${skills.map(s=>`<button onclick="UI.commandOpen=false; nav('skills/${s.id}')" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-white/[0.06] text-left"><i data-lucide="book-open" class="w-[14px] h-[14px] text-violet-300"></i><span class="text-sm text-white/80">${esc(s.name)}</span></button>`).join("")}</div>`:""}
+        ${users.length?`<div class="mb-1"><p class="text-[10.5px] uppercase tracking-wide text-white/30 px-3 py-1.5">People</p>${users.map(u=>`<button onclick="UI.commandOpen=false; nav('profile/${u.username}')" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-white/[0.06] text-left">${avatarHTML(u,20)}<span class="text-sm text-white/80">${esc(u.name)}</span></button>`).join("")}</div>`:""}
+        ${categories.length?`<div><p class="text-[10.5px] uppercase tracking-wide text-white/30 px-3 py-1.5">Categories</p>${categories.map(c=>`<button onclick="UI.commandOpen=false; UI.discover.category='${c}'; nav('discover')" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-white/[0.06] text-left"><i data-lucide="filter" class="w-[14px] h-[14px] text-cyan-300"></i><span class="text-sm text-white/80">${esc(c)}</span></button>`).join("")}</div>`:""}
+      </div></div></div>`;
+}
+document.addEventListener("keydown", (e)=>{
+  if ((e.metaKey||e.ctrlKey) && e.key.toLowerCase()==="k"){ e.preventDefault(); UI.commandOpen=!UI.commandOpen; render(); }
+  if (e.key==="Escape"){ if (UI.commandOpen){ UI.commandOpen=false; render(); } if (UI.book.open){ UI.book.open=false; render(); } if (UI.compose.open){ UI.compose.open=false; render(); } }
+});
+
+/* ================================= DASHBOARD ==================================== */
+function greeting(){ const h = new Date().getHours(); return h<12?"Good morning":h<18?"Good afternoon":"Good evening"; }
+function DashboardPage(){
+  const cu = currentUser(); const ctx = userCtx(cu.id);
+  const isNew = DB.bookings.filter(b=>b.studentId===cu.id||b.teacherId===cu.id).length===0 && ctx.skillsPublished===0;
+  const wantNames = cu.learnSkills.map(s=>s.name.toLowerCase());
+  const recommended = DB.skills.filter(s=>s.teacherId!==cu.id && s.active!==false)
+    .map(s=>({s, score: wantNames.some(w=>s.name.toLowerCase().includes(w.split(" ")[0].toLowerCase()))?2:0}))
+    .sort((a,b)=>b.score-a.score).slice(0,4).map(x=>x.s);
+  const beginnerFriendly = DB.skills.filter(s=>s.price<=cu.credits && s.teacherId!==cu.id).slice(0,3);
+  const stats = [["Skills Taught",`${ctx.completedTaught}`,"sessions","graduation-cap"],["Skills Learned",`${ctx.completedLearned}`,"sessions","book-open"],["Learning Streak",`${cu.streak}`,"days","flame"],["Average Rating",`${cu.rating}`,"/ 5.0","star"]];
+
+  return `<div class="space-y-7">
+    <div><h1 class="font-display text-2xl sm:text-[28px] font-semibold">${greeting()}, ${esc(cu.name.split(" ")[0])}.</h1><p class="text-white/45 text-sm mt-1">Here's what's happening with your skills today.</p></div>
+    <div class="grid lg:grid-cols-3 gap-5">
+      <div class="ss-card p-6 lg:col-span-1 relative overflow-hidden">
+        <div class="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-violet-600/20 blur-3xl"></div>
+        <div class="relative"><p class="text-xs text-white/40 mb-1">Your balance</p>
+          <div class="flex items-baseline gap-2"><span class="font-display text-4xl font-semibold">${cu.credits}</span><span class="text-sm text-white/50">Skill Credits</span></div>
+          ${isNew?badgeHTML("Welcome bonus","cyan","mt-2"):""}
+          <div class="flex gap-2 mt-5">${btn({label:"Use Credits", size:"sm", extra:"flex-1", onclick:"nav('discover')"})}${btn({label:"Earn Credits", size:"sm", variant:"secondary", extra:"flex-1", onclick:"nav('teach')"})}</div></div></div>
+      <div class="grid grid-cols-2 gap-4 lg:col-span-2">
+        ${stats.map(([label,value,sub,icon])=>`<div class="ss-card p-4"><div class="flex items-center justify-between mb-3"><i data-lucide="${icon}" class="w-4 h-4 text-violet-300"></i></div><div class="font-display text-xl font-semibold">${value} <span class="text-xs text-white/35 font-normal">${sub}</span></div><div class="text-xs text-white/40 mt-0.5">${label}</div></div>`).join("")}
+      </div>
+    </div>
+    ${isNew?`<div class="ss-card p-6 border-violet-400/20 bg-gradient-to-br from-violet-500/[0.06] to-cyan-400/[0.03]">
+      <div class="flex items-start justify-between flex-wrap gap-4">
+        <div><h3 class="font-display text-lg font-semibold mb-1">Ready to learn your first skill?</h3><p class="text-sm text-white/50">You have <span class="text-white font-medium">${cu.credits} Skill Credits</span>. Here are beginner-friendly skills you can learn right away.</p></div>
+        ${btn({label:"Find My First Skill", iconRight:"arrow-right", onclick:"nav('discover')"})}</div>
+      <div class="grid sm:grid-cols-3 gap-4 mt-5">${beginnerFriendly.map(skillCardHTML).join("")}</div></div>`:""}
+    <div><div class="flex items-center justify-between mb-4"><h2 class="font-display text-lg font-semibold">Recommended for you</h2>${btn({label:"See all", variant:"ghost", size:"sm", onclick:"nav('discover')"})}</div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">${recommended.map(skillCardHTML).join("")}</div></div>
+    <div class="grid lg:grid-cols-2 gap-5">
+      <div class="ss-card p-5"><div class="flex items-center justify-between mb-3"><h3 class="font-display font-semibold">Upcoming sessions</h3>${btn({label:"View all", variant:"ghost", size:"sm", onclick:"nav('sessions')"})}</div>${UpcomingListHTML()}</div>
+      <div class="ss-card p-5"><div class="flex items-center justify-between mb-3"><h3 class="font-display font-semibold">Recent activity</h3>${btn({label:"Wallet", variant:"ghost", size:"sm", onclick:"nav('credits')"})}</div>${RecentTransactionsHTML()}</div>
+    </div></div>`;
+}
+function UpcomingListHTML(){
+  const cu = currentUser();
+  const list = DB.bookings.filter(b=>(b.studentId===cu.id||b.teacherId===cu.id) && b.status==="upcoming").slice(0,3);
+  if (list.length===0) return emptyState("calendar","Nothing booked yet","Your learning journey starts here.", btn({label:"Discover Skills", size:"sm", onclick:"nav('discover')"}));
+  return `<div class="space-y-2">${list.map(b=>{
+    const skill = DB.skills.find(s=>s.id===b.skillId); const isTeaching = b.teacherId===cu.id;
+    const other = DB.users.find(u=>u.id===(isTeaching?b.studentId:b.teacherId));
+    return `<div class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-white/[0.04] transition-colors cursor-pointer" onclick="nav('sessions')">
+      ${avatarHTML(other,32)}<div class="min-w-0 flex-1"><p class="text-sm text-white/85 truncate">${esc(skill?.name||"")}</p><p class="text-xs text-white/40">${isTeaching?"Teaching":"Learning"} · ${b.date} at ${b.time}</p></div>
+      ${badgeHTML(isTeaching?"Teach":"Learn", isTeaching?"emerald":"cyan")}</div>`;
+  }).join("")}</div>`;
+}
+function RecentTransactionsHTML(){
+  const cu = currentUser(); const list = DB.transactions.filter(t=>t.userId===cu.id).slice(0,4);
+  if (list.length===0) return `<p class="text-sm text-white/40">No transactions yet.</p>`;
+  return `<div class="space-y-2">${list.map(t=>`<div class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-white/[0.04] transition-colors">
+    <div class="h-8 w-8 rounded-full flex items-center justify-center shrink-0 ${t.amount>0?"bg-emerald-500/10 text-emerald-400":"bg-rose-500/10 text-rose-400"}"><i data-lucide="${t.amount>0?"arrow-up":"arrow-down"}" class="w-[14px] h-[14px]"></i></div>
+    <div class="min-w-0 flex-1"><p class="text-sm text-white/85 truncate">${esc(t.description)}</p><p class="text-xs text-white/40">${timeAgo(t.createdAt)}</p></div>
+    <span class="text-sm font-semibold ${t.amount>0?"text-emerald-400":"text-rose-400"}">${t.amount>0?"+":""}${t.amount}</span></div>`).join("")}</div>`;
+}
+
+/* ================================= DISCOVER ===================================== */
+function DiscoverPage(){
+  const cu = currentUser(); const f = UI.discover;
+  const { params } = parseHash();
+  if (params.get("skill") && !f._appliedSkill){ f.search = params.get("skill"); f._appliedSkill = true; }
+  if (params.get("category") && !f._appliedCat){ f.category = params.get("category"); f._appliedCat = true; }
+
+  let r = DB.skills.filter(s=>s.active!==false && s.teacherId!==cu.id);
+  if (f.search){ const q=f.search.toLowerCase(); r = r.filter(s=>s.name.toLowerCase().includes(q) || DB.users.find(u=>u.id===s.teacherId)?.name.toLowerCase().includes(q) || s.category.toLowerCase().includes(q)); }
+  if (f.category) r = r.filter(s=>s.category===f.category);
+  if (f.level) r = r.filter(s=>s.level===f.level);
+  if (f.format) r = r.filter(s=>s.format===f.format);
+  r = r.filter(s=>s.price<=f.maxCredits);
+  r = r.filter(s=>parseFloat(s.rating)>=f.minRating || s.rating==="New");
+  switch(f.sort){
+    case "Popular": r = [...r].sort((a,b)=>b.studentsCount-a.studentsCount); break;
+    case "Highest Rated": r = [...r].sort((a,b)=>parseFloat(b.rating||0)-parseFloat(a.rating||0)); break;
+    case "Lowest Credits": r = [...r].sort((a,b)=>a.price-b.price); break;
+    case "Newest": r = [...r].sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)); break;
+  }
+  return `<div class="space-y-6">
+    <div><h1 class="font-display text-2xl sm:text-[28px] font-semibold">Discover your next skill</h1><p class="text-white/45 text-sm mt-1">${DB.skills.length} skills from ${DB.users.length} students, ready to teach.</p></div>
+    <div class="flex flex-col sm:flex-row gap-3">
+      <div class="relative flex-1"><i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white/35"></i>
+        <input value="${esc(f.search)}" oninput="UI.discover.search=this.value; render()" placeholder="Search skills, topics, or teachers..." class="ss-input pl-10"/></div>
+      ${btn({label:"Filters", variant:"secondary", icon:"sliders-horizontal", onclick:"UI.discover.showFilters=!UI.discover.showFilters; render()"})}
+      <select onchange="UI.discover.sort=this.value; render()" class="ss-input sm:w-48">${["Recommended","Popular","Highest Rated","Lowest Credits","Newest"].map(s=>`<option ${f.sort===s?"selected":""}>${s}</option>`).join("")}</select>
+    </div>
+    ${f.showFilters?`<div class="ss-card p-5 grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      ${fieldHTML("Category", `<select onchange="UI.discover.category=this.value; render()" class="ss-input"><option value="">All</option>${CATEGORIES.map(c=>`<option ${f.category===c?"selected":""}>${c}</option>`).join("")}</select>`)}
+      ${fieldHTML("Level", `<select onchange="UI.discover.level=this.value; render()" class="ss-input"><option value="">Any</option>${["Beginner","Intermediate","Advanced"].map(l=>`<option ${f.level===l?"selected":""}>${l}</option>`).join("")}</select>`)}
+      ${fieldHTML("Format", `<select onchange="UI.discover.format=this.value; render()" class="ss-input"><option value="">Any</option><option ${f.format==="1-on-1"?"selected":""}>1-on-1</option><option ${f.format==="Small group"?"selected":""}>Small group</option></select>`)}
+      ${fieldHTML(`Max credits: ${f.maxCredits}`, `<input type="range" min="10" max="100" value="${f.maxCredits}" oninput="UI.discover.maxCredits=+this.value; render()" class="w-full accent-violet-500"/>`)}
+      ${fieldHTML(`Min rating: ${f.minRating}`, `<input type="range" min="0" max="5" step="0.5" value="${f.minRating}" oninput="UI.discover.minRating=+this.value; render()" class="w-full accent-violet-500"/>`)}
+    </div>`:""}
+    <div class="flex gap-2 flex-wrap">${CATEGORIES.map(c=>`<button onclick="UI.discover.category=UI.discover.category==='${c}'?'':'${c}'; render()" class="px-3 py-1.5 rounded-full text-xs border transition-colors ${f.category===c?"bg-violet-500/20 border-violet-400/50 text-white":"border-white/10 text-white/50 hover:border-white/25"}">${c}</button>`).join("")}</div>
+    ${r.length===0?emptyState("search","No skills match your search","Try a different keyword, or clear your filters to see everything available.", btn({label:"Clear filters", size:"sm", onclick:"UI.discover={search:'',category:'',level:'',maxCredits:100,minRating:0,format:'',sort:'Recommended',showFilters:false}; render()"}))
+      : `<div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">${r.map(skillCardHTML).join("")}</div>`}
+  </div>`;
+}
+
+/* =============================== SKILL DETAIL ==================================== */
+function SkillDetailPage(id){
+  const skill = DB.skills.find(s=>s.id===id);
+  if (!skill) return emptyState("compass","Skill not found","This skill doesn't exist or may have been removed.", btn({label:"Back to SkillSwap", onclick:"nav('')"}));
+  const teacher = DB.users.find(u=>u.id===skill.teacherId);
+  const reviews = [
+    { name:"Maya Chen", rating:5, text:"Clear, patient, and genuinely fun. I went from zero to confident in one session." },
+    { name:"Ravi Kapoor", rating:5, text:"Best explanation of this topic I've had — including from paid tutors." },
+    { name:"Ines Costa", rating:4, text:"Great session, would have liked a bit more time on the practice exercises." },
+  ];
+  return `<div class="space-y-6 max-w-5xl">
+    <button onclick="nav('discover')" class="text-sm text-white/45 hover:text-white flex items-center gap-1"><i data-lucide="chevron-left" class="w-[15px] h-[15px]"></i>Back to Discover</button>
+    <div class="grid lg:grid-cols-3 gap-6">
+      <div class="lg:col-span-2 space-y-6">
+        <div>${badgeHTML(skill.category,"violet")}<h1 class="font-display text-2xl sm:text-3xl font-semibold mt-3">${esc(skill.name)}</h1>
+          <div class="flex items-center gap-4 mt-3 text-sm text-white/50"><span class="flex items-center gap-1 text-amber-400"><i data-lucide="star" class="w-[14px] h-[14px] fill-current"></i>${skill.rating}</span><span>${skill.studentsCount} students taught</span><span>${skill.level}</span></div></div>
+        <div class="ss-card p-5"><h3 class="font-display font-semibold mb-2">About this session</h3><p class="text-sm text-white/55 leading-relaxed">${esc(skill.description)}</p></div>
+        <div class="ss-card p-5"><h3 class="font-display font-semibold mb-3">What you'll learn</h3><ul class="space-y-2">${(skill.whatYouLearn||[]).map(w=>`<li class="flex items-start gap-2 text-sm text-white/60"><i data-lucide="check" class="w-[15px] h-[15px] text-emerald-400 mt-0.5 shrink-0"></i>${esc(w)}</li>`).join("")}</ul></div>
+        <div class="ss-card p-5"><h3 class="font-display font-semibold mb-3">Session structure</h3><div class="flex flex-wrap gap-2">${(skill.topics||[]).map(t=>badgeHTML(t)).join("")}</div>
+          <div class="grid grid-cols-3 gap-3 mt-4 text-center">
+            <div class="rounded-lg bg-white/[0.03] py-3"><div class="text-sm font-semibold">${skill.duration} min</div><div class="text-[11px] text-white/40">Duration</div></div>
+            <div class="rounded-lg bg-white/[0.03] py-3"><div class="text-sm font-semibold">${skill.format}</div><div class="text-[11px] text-white/40">Format</div></div>
+            <div class="rounded-lg bg-white/[0.03] py-3"><div class="text-sm font-semibold">${skill.price}</div><div class="text-[11px] text-white/40">Credits</div></div></div></div>
+        <div class="ss-card p-5"><h3 class="font-display font-semibold mb-4">Reviews</h3><div class="space-y-4">${reviews.map(r=>`<div class="flex gap-3">${avatarHTML({name:r.name,avatarColor:hueFor(r.name)},34)}
+          <div><div class="flex items-center gap-2"><span class="text-sm font-medium">${esc(r.name)}</span><span class="flex text-amber-400">${Array.from({length:r.rating}).map(()=>`<i data-lucide="star" class="w-[11px] h-[11px] fill-current"></i>`).join("")}</span></div><p class="text-sm text-white/50 mt-0.5">${esc(r.text)}</p></div></div>`).join("")}</div></div>
+      </div>
+      <div class="space-y-4"><div class="ss-card p-5 sticky top-20">
+        <button onclick="nav('profile/${teacher.username}')" class="flex items-center gap-3 mb-4 w-full text-left">${avatarHTML(teacher,44)}<div><div class="text-sm font-semibold text-white">${esc(teacher.name)}</div><div class="text-xs text-white/40">${esc(teacher.university||"SkillSwap student")}</div></div></button>
+        <div class="flex items-center justify-between text-sm mb-4"><span class="text-white/50">Session cost</span><span class="font-display text-xl font-semibold text-cyan-300">${skill.price} credits</span></div>
+        ${btn({label:"Book Session", extra:"w-full mb-2", onclick:`openBooking('${skill.id}')`})}
+        ${btn({label:"Message Teacher", variant:"secondary", extra:"w-full", onclick:`nav('messages/${teacher.id}')`})}
+        <div class="mt-4 pt-4 border-t border-white/[0.06] flex items-center gap-2 text-xs text-white/40"><span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>Available today</div>
+      </div></div>
+    </div></div>`;
+}
+function openBooking(skillId){ UI.book = { open:true, skillId, date:new Date(Date.now()+86400000).toISOString().slice(0,10), time:"14:00", step:"form" }; renderModals(); }
+function closeBooking(){ UI.book.open=false; renderModals(); }
+function BookingModalHTML(){
+  const cu = currentUser(); const skill = DB.skills.find(s=>s.id===UI.book.skillId); if (!skill) return "";
+  const teacher = DB.users.find(u=>u.id===skill.teacherId);
+  const insufficient = cu.credits < skill.price;
+  let body = "";
+  if (UI.book.step === "success"){
+    body = `<div class="text-center py-2"><div class="h-14 w-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center mx-auto mb-4"><i data-lucide="check-circle-2" class="w-[26px] h-[26px] text-emerald-400"></i></div>
+      <h3 class="font-display text-lg font-semibold mb-1">You're booked!</h3>
+      <p class="text-sm text-white/50 mb-5">${esc(skill.name)} with ${esc(teacher.name)} on ${UI.book.date} at ${UI.book.time}. ${skill.price} credits were deducted from your wallet.</p>
+      <div class="flex gap-2 justify-center">${btn({label:"View Sessions", variant:"secondary", onclick:"closeBooking(); nav('sessions')"})}${btn({label:"Message Teacher", onclick:`closeBooking(); nav('messages/${teacher.id}')`})}</div></div>`;
+  } else if (insufficient){
+    body = `<div class="text-center py-2"><div class="h-12 w-12 rounded-full bg-rose-500/10 flex items-center justify-center mx-auto mb-4"><i data-lucide="alert-circle" class="w-[22px] h-[22px] text-rose-400"></i></div>
+      <h3 class="font-display text-lg font-semibold mb-1">Not enough Skill Credits</h3>
+      <p class="text-sm text-white/50 mb-4">You need <span class="text-white">${skill.price} credits</span>, you have <span class="text-white">${cu.credits} credits</span>. You need <span class="text-white">${skill.price-cu.credits} more</span>.</p>
+      <div class="flex gap-2 justify-center">${btn({label:"Teach a Skill", variant:"secondary", onclick:"closeBooking(); nav('teach')"})}${btn({label:"Find a Way to Earn Credits", onclick:"closeBooking(); nav('discover')"})}</div></div>`;
+  } else {
+    body = `<div class="space-y-4">
+      <div class="flex items-center gap-3 p-3 rounded-lg bg-white/[0.03] border border-white/[0.06]">${avatarHTML(teacher,36)}<div><p class="text-sm font-medium">${esc(skill.name)}</p><p class="text-xs text-white/40">with ${esc(teacher.name)}</p></div></div>
+      <div class="grid grid-cols-2 gap-3">
+        ${fieldHTML("Date", `<input type="date" min="${new Date().toISOString().slice(0,10)}" value="${UI.book.date}" oninput="UI.book.date=this.value" class="ss-input"/>`)}
+        ${fieldHTML("Time", `<input type="time" value="${UI.book.time}" oninput="UI.book.time=this.value" class="ss-input"/>`)}
+      </div>
+      <div class="ss-card p-4 space-y-2">
+        <h4 class="text-xs font-semibold text-white/50 uppercase tracking-wide mb-1">Booking summary</h4>
+        <div class="flex justify-between text-sm"><span class="text-white/50">Skill</span><span>${esc(skill.name)}</span></div>
+        <div class="flex justify-between text-sm"><span class="text-white/50">Teacher</span><span>${esc(teacher.name)}</span></div>
+        <div class="flex justify-between text-sm"><span class="text-white/50">Duration</span><span>${skill.duration} minutes</span></div>
+        <div class="flex justify-between text-sm"><span class="text-white/50">Cost</span><span class="text-cyan-300">${skill.price} Skill Credits</span></div>
+        <div class="h-px bg-white/[0.08] my-1"></div>
+        <div class="flex justify-between text-sm"><span class="text-white/50">Current balance</span><span>${cu.credits} Skill Credits</span></div>
+        <div class="flex justify-between text-sm font-medium"><span class="text-white/70">Remaining</span><span>${cu.credits-skill.price} Skill Credits</span></div>
+      </div>
+      ${btn({label:"Confirm Session", size:"lg", extra:"w-full", onclick:"confirmBooking()"})}
+    </div>`;
+  }
+  return `<div class="fixed inset-0 z-[150] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/70 backdrop-blur-sm modal-fade" onclick="closeBooking()"></div>
+    <div role="dialog" class="relative w-full max-w-lg modal-pop rounded-2xl border border-white/10 bg-[#0c0c14] shadow-2xl max-h-[88vh] overflow-y-auto">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-white/[0.06] sticky top-0 bg-[#0c0c14]/95 backdrop-blur z-10">
+        <h3 class="font-display font-semibold text-white text-[17px]">${UI.book.step==="success"?"Session confirmed":"Book Session"}</h3>
+        <button onclick="closeBooking()" class="text-white/40 hover:text-white transition-colors p-1"><i data-lucide="x" class="w-[18px] h-[18px]"></i></button></div>
+      <div class="p-6">${body}</div></div></div>`;
+}
+function confirmBooking(){
+  const cu = currentUser(); const skill = DB.skills.find(s=>s.id===UI.book.skillId);
+  if (!skill || cu.credits < skill.price) return;
+  const booking = { id:uid("bk"), skillId:skill.id, teacherId:skill.teacherId, studentId:cu.id, date:UI.book.date, time:UI.book.time, duration:skill.duration, credits:skill.price, status:"upcoming", createdAt:nowISO() };
+  DB.bookings.unshift(booking);
+  cu.credits -= skill.price;
+  DB.transactions.unshift({ id:uid("tx"), userId:cu.id, amount:-skill.price, type:"SESSION_PAYMENT", description:`${skill.name} learning session`, bookingId:booking.id, createdAt:nowISO() });
+  DB.notifications.unshift({ id:uid("ntf"), userId:cu.id, text:`Session booked: ${skill.name} on ${UI.book.date} at ${UI.book.time}.`, type:"booking", read:false, createdAt:nowISO() });
+  DB.notifications.unshift({ id:uid("ntf"), userId:skill.teacherId, text:`${cu.name} booked your ${skill.name} session.`, type:"booking", read:false, createdAt:nowISO() });
+  toast("Session booked! Credits deducted.");
+  UI.book.step = "success";
+  render();
+}
+
+/* =================================== TEACH ======================================= */
+let TEACH_FORM = { name:"", category:CATEGORIES[0], description:"", level:"Beginner", years:1, format:"1-on-1", duration:60, price:40, availability:"Weekday evenings", topicsRaw:"" };
+let TEACH_DONE = null;
+function TeachPage(){
+  if (TEACH_DONE){
+    const name = TEACH_FORM.name;
+    const id = TEACH_DONE;
+    return `<div class="max-w-lg mx-auto py-14 text-center">
+      <div class="h-14 w-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center mx-auto mb-5"><i data-lucide="check-circle-2" class="w-[26px] h-[26px] text-emerald-400"></i></div>
+      <h1 class="font-display text-2xl font-semibold mb-2">Skill published.</h1>
+      <p class="text-white/50 mb-6">"${esc(name)}" is now live and discoverable by other students.</p>
+      <div class="flex gap-2 justify-center">${btn({label:"View My Skills", variant:"secondary", onclick:"TEACH_DONE=null; nav('my-skills')"})}${btn({label:"View Skill Page", onclick:`TEACH_DONE=null; nav('skills/${id}')`})}</div></div>`;
+  }
+  const f = TEACH_FORM;
+  return `<div class="max-w-2xl space-y-6">
+    <div><h1 class="font-display text-2xl sm:text-[28px] font-semibold">Teach a skill</h1><p class="text-white/45 text-sm mt-1">Publish something you know — earn Skill Credits every time you teach it.</p></div>
+    <div class="ss-card p-6"><form onsubmit="return submitTeach(event)" class="space-y-4">
+      ${fieldHTML("Skill name", `<input value="${esc(f.name)}" oninput="TEACH_FORM.name=this.value" placeholder="e.g. Intro to React Hooks" class="ss-input"/>`, {required:true})}
+      <div class="grid grid-cols-2 gap-3">
+        ${fieldHTML("Category", `<select onchange="TEACH_FORM.category=this.value" class="ss-input">${CATEGORIES.map(c=>`<option ${f.category===c?"selected":""}>${c}</option>`).join("")}</select>`, {required:true})}
+        ${fieldHTML("Experience level", `<select onchange="TEACH_FORM.level=this.value" class="ss-input">${["Beginner","Intermediate","Advanced"].map(l=>`<option ${f.level===l?"selected":""}>${l}</option>`).join("")}</select>`, {required:true})}
+      </div>
+      ${fieldHTML("Description", `<textarea rows="3" oninput="TEACH_FORM.description=this.value" class="ss-input resize-none" placeholder="What will students take away from this session?">${esc(f.description)}</textarea>`, {required:true})}
+      ${fieldHTML("Topics covered", `<input value="${esc(f.topicsRaw)}" oninput="TEACH_FORM.topicsRaw=this.value" placeholder="Fundamentals, live coding, Q&A" class="ss-input"/>`, {hint:"comma separated"})}
+      <div class="grid grid-cols-2 gap-3">
+        ${fieldHTML("Years of experience", `<input type="number" min="0" value="${f.years}" oninput="TEACH_FORM.years=this.value" class="ss-input"/>`, {required:true})}
+        ${fieldHTML("Teaching format", `<select onchange="TEACH_FORM.format=this.value" class="ss-input"><option ${f.format==="1-on-1"?"selected":""}>1-on-1</option><option ${f.format==="Small group"?"selected":""}>Small group</option></select>`, {required:true})}
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        ${fieldHTML("Session duration (minutes)", `<select onchange="TEACH_FORM.duration=this.value" class="ss-input">${[30,45,60,90].map(d=>`<option value="${d}" ${f.duration==d?"selected":""}>${d}</option>`).join("")}</select>`, {required:true})}
+        ${fieldHTML("Credit price", `<input type="number" min="5" step="5" value="${f.price}" oninput="TEACH_FORM.price=this.value" class="ss-input"/>`, {required:true, hint:"per session"})}
+      </div>
+      ${fieldHTML("Availability", `<input value="${esc(f.availability)}" oninput="TEACH_FORM.availability=this.value" placeholder="e.g. Weekday evenings" class="ss-input"/>`)}
+      ${btn({label:"Publish Skill", type:"submit", size:"lg", extra:"w-full"})}
+    </form></div></div>`;
+}
+function submitTeach(e){
+  e.preventDefault();
+  const cu = currentUser(); const f = TEACH_FORM;
+  if (!f.name.trim()) return false;
+  const id = uid("sk");
+  DB.skills.unshift({ id, teacherId:cu.id, studentsCount:0, rating:"New", createdAt:nowISO(), active:true,
+    name:f.name, category:f.category, description:f.description || `A hands-on session on ${f.name}, taught by ${cu.name}.`,
+    level:f.level, format:f.format, duration:+f.duration, price:+f.price,
+    whatYouLearn:[`Core concepts of ${f.name}`,"Hands-on practice","Personalized feedback"],
+    topics: f.topicsRaw ? f.topicsRaw.split(",").map(t=>t.trim()).filter(Boolean) : [`${f.name} basics`] });
+  cu.teachSkills.push({ name:f.name, level:f.level, years:+f.years });
+  checkAchievements(cu.id);
+  toast("Skill published — it's now discoverable.");
+  TEACH_DONE = id;
+  render();
+  return false;
+}
+
+/* ================================= MY SKILLS ====================================== */
+function MySkillsPage(){
+  const cu = currentUser(); const mine = DB.skills.filter(s=>s.teacherId===cu.id);
+  if (mine.length===0) return emptyState("book-open","You haven't published a skill yet","Share something you know and start earning Skill Credits.", btn({label:"Teach a Skill", onclick:"nav('teach')"}));
+  return `<div class="space-y-6">
+    <div class="flex items-center justify-between flex-wrap gap-3"><div><h1 class="font-display text-2xl sm:text-[28px] font-semibold">My skills</h1><p class="text-white/45 text-sm mt-1">Skills you're teaching on SkillSwap.</p></div>${btn({label:"Teach a Skill", icon:"plus", onclick:"nav('teach')"})}</div>
+    <div class="grid sm:grid-cols-2 gap-5">${mine.map(s=>{
+      const sessions = DB.bookings.filter(b=>b.skillId===s.id);
+      const earned = DB.transactions.filter(t=>t.type==="TEACHING_REWARD" && sessions.some(b=>b.id===t.bookingId)).reduce((sum,t)=>sum+t.amount,0);
+      return `<div class="ss-card p-5">
+        <div class="flex items-start justify-between mb-2"><div><h3 class="font-display font-semibold">${esc(s.name)}</h3>${badgeHTML(s.category,"violet","mt-1.5")}</div>${badgeHTML(s.active?"Active":"Paused", s.active?"emerald":"amber")}</div>
+        <div class="grid grid-cols-3 gap-3 my-4 text-center">
+          <div><div class="text-sm font-semibold">${sessions.length}</div><div class="text-[11px] text-white/40">Sessions</div></div>
+          <div><div class="text-sm font-semibold flex items-center justify-center gap-1"><i data-lucide="star" class="w-[11px] h-[11px] text-amber-400 fill-current"></i>${s.rating}</div><div class="text-[11px] text-white/40">Rating</div></div>
+          <div><div class="text-sm font-semibold text-cyan-300">${earned}</div><div class="text-[11px] text-white/40">Earned</div></div></div>
+        <div class="flex gap-2">
+          ${btn({label:"View", size:"sm", variant:"secondary", icon:"eye", extra:"flex-1", onclick:`nav('skills/${s.id}')`})}
+          ${btn({label: s.active?"Pause":"Resume", size:"sm", variant:"secondary", icon: s.active?"pause":"play", extra:"flex-1", onclick:`toggleSkillActive('${s.id}')`})}
+          ${btn({label:"", size:"sm", variant:"danger", icon:"trash-2", onclick:`deleteSkill('${s.id}')`})}
+        </div></div>`;
+    }).join("")}</div></div>`;
+}
+function toggleSkillActive(id){ const s = DB.skills.find(s=>s.id===id); if (s) s.active = !s.active; render(); }
+function deleteSkill(id){ DB.skills = DB.skills.filter(s=>s.id!==id); toast("Skill removed."); render(); }
+
+/* =================================== SESSIONS ===================================== */
+function SessionsPage(){
+  const cu = currentUser(); const tab = UI.sessionsTab;
+  const all = DB.bookings.filter(b=>b.studentId===cu.id||b.teacherId===cu.id);
+  const list = all.filter(b=>b.status===tab).sort((a,b)=>new Date(a.date)-new Date(b.date));
+  return `<div class="space-y-6">
+    <div><h1 class="font-display text-2xl sm:text-[28px] font-semibold">Sessions</h1><p class="text-white/45 text-sm mt-1">Your teaching and learning schedule.</p></div>
+    <div class="flex gap-1 border-b border-white/[0.08]">${["upcoming","completed","cancelled"].map(t=>`<button onclick="UI.sessionsTab='${t}'; render()" class="px-4 py-2.5 text-sm font-medium capitalize border-b-2 -mb-px transition-colors ${tab===t?"border-violet-400 text-white":"border-transparent text-white/45 hover:text-white/70"}">${t} <span class="text-white/30 ml-1">${all.filter(b=>b.status===t).length}</span></button>`).join("")}</div>
+    ${list.length===0 ? emptyState("calendar", `No ${tab} sessions`, tab==="upcoming"?"Your learning journey starts here. You haven't booked a session yet.":`You don't have any ${tab} sessions.`, tab==="upcoming"?btn({label:"Discover Skills", size:"sm", onclick:"nav('discover')"}):"")
+      : `<div class="space-y-3">${list.map(b=>{
+        const skill = DB.skills.find(s=>s.id===b.skillId); const isTeaching = b.teacherId===cu.id;
+        const other = DB.users.find(u=>u.id===(isTeaching?b.studentId:b.teacherId));
+        return `<div class="ss-card p-4 flex items-center gap-4 flex-wrap">
+          ${avatarHTML(other,40)}
+          <div class="min-w-0 flex-1"><div class="flex items-center gap-2 flex-wrap"><p class="font-medium text-white text-sm">${esc(skill?.name||"")}</p>${badgeHTML(isTeaching?"Teaching":"Learning", isTeaching?"emerald":"cyan")}</div>
+            <p class="text-xs text-white/40 mt-0.5">${isTeaching?"with":"taught by"} ${esc(other?.name||"")} · ${b.date} at ${b.time} · ${b.duration}min · ${b.credits} credits</p></div>
+          <div class="flex gap-2">
+            ${tab==="upcoming"?`${btn({label:"Message", size:"sm", variant:"secondary", icon:"message-square", onclick:`nav('messages/${other.id}')`})}${isTeaching?btn({label:"Complete", size:"sm", variant:"secondary", icon:"check-circle-2", onclick:`completeBooking('${b.id}')`}):""}${btn({label:"Cancel", size:"sm", variant:"danger", onclick:`cancelBooking('${b.id}')`})}`
+              : btn({label:"View", size:"sm", variant:"ghost", onclick:`nav('skills/${b.skillId}')`})}
+          </div></div>`;
+      }).join("")}</div>`}
+  </div>`;
+}
+function cancelBooking(id){
+  const booking = DB.bookings.find(b=>b.id===id); if (!booking) return;
+  booking.status = "cancelled";
+  const student = DB.users.find(u=>u.id===booking.studentId); student.credits += booking.credits;
+  DB.transactions.unshift({ id:uid("tx"), userId:booking.studentId, amount:booking.credits, type:"REFUND", description:"Session cancelled — credits refunded", bookingId:id, createdAt:nowISO() });
+  DB.notifications.unshift({ id:uid("ntf"), userId:booking.studentId, text:"Your session was cancelled and credits were refunded.", type:"session", read:false, createdAt:nowISO() });
+  toast("Session cancelled — credits refunded."); render();
+}
+function completeBooking(id){
+  const booking = DB.bookings.find(b=>b.id===id); if (!booking) return;
+  const skill = DB.skills.find(s=>s.id===booking.skillId);
+  booking.status = "completed";
+  const teacher = DB.users.find(u=>u.id===booking.teacherId); const student = DB.users.find(u=>u.id===booking.studentId);
+  teacher.credits += booking.credits; teacher.sessionsTaught += 1;
+  student.sessionsLearned += 1; student.streak += 1;
+  DB.transactions.unshift({ id:uid("tx"), userId:booking.teacherId, amount:booking.credits, type:"TEACHING_REWARD", description:`${skill?.name||"Session"} teaching session`, bookingId:id, createdAt:nowISO() });
+  DB.notifications.unshift({ id:uid("ntf"), userId:booking.teacherId, text:`You received ${booking.credits} Skill Credits for teaching ${skill?.name||"a session"}.`, type:"credit", read:false, createdAt:nowISO() });
+  checkAchievements(booking.teacherId); checkAchievements(booking.studentId);
+  toast("Session marked complete."); render();
+}
+
+/* ==================================== CREDITS ====================================== */
+function CreditsPage(){
+  const cu = currentUser(); const tx = DB.transactions.filter(t=>t.userId===cu.id);
+  const earned = tx.filter(t=>t.amount>0).reduce((s,t)=>s+t.amount,0);
+  const spent = Math.abs(tx.filter(t=>t.amount<0).reduce((s,t)=>s+t.amount,0));
+  return `<div class="space-y-6">
+    <div><h1 class="font-display text-2xl sm:text-[28px] font-semibold">Skill Credits</h1><p class="text-white/45 text-sm mt-1">Your wallet, earnings, and spending history.</p></div>
+    <div class="grid sm:grid-cols-3 gap-4">
+      <div class="ss-card p-6"><p class="text-xs text-white/40 mb-1">Current balance</p><span class="font-display text-3xl font-semibold">${cu.credits}</span></div>
+      <div class="ss-card p-6"><p class="text-xs text-white/40 mb-1">Credits earned</p><span class="font-display text-3xl font-semibold text-emerald-400">${earned}</span></div>
+      <div class="ss-card p-6"><p class="text-xs text-white/40 mb-1">Credits spent</p><span class="font-display text-3xl font-semibold text-rose-400">${spent}</span></div></div>
+    <div class="ss-card p-5"><h3 class="font-display font-semibold mb-4">Transaction history</h3>
+      ${tx.length===0?`<p class="text-sm text-white/40">No transactions yet.</p>`:`<div class="divide-y divide-white/[0.06]">${tx.map(t=>`<div class="flex items-center gap-3 py-3">
+        <div class="h-9 w-9 rounded-full flex items-center justify-center shrink-0 ${t.amount>0?"bg-emerald-500/10 text-emerald-400":"bg-rose-500/10 text-rose-400"}"><i data-lucide="${t.amount>0?"arrow-up":"arrow-down"}" class="w-[15px] h-[15px]"></i></div>
+        <div class="min-w-0 flex-1"><p class="text-sm text-white/85">${esc(t.description)}</p><p class="text-xs text-white/35 mt-0.5">${timeAgo(t.createdAt)} · ${t.type.replace(/_/g," ").toLowerCase()}</p></div>
+        <span class="text-sm font-semibold ${t.amount>0?"text-emerald-400":"text-rose-400"}">${t.amount>0?"+":""}${t.amount}</span></div>`).join("")}</div>`}
+    </div></div>`;
+}
+
+/* ================================== LEADERBOARD ==================================== */
+function LeaderboardPage(){
+  const cu = currentUser(); const tab = UI.leaderboardTab;
+  const factor = tab==="Weekly"?0.15:tab==="Monthly"?0.45:1;
+  const ranked = DB.users.map(u=>{ const earned = DB.transactions.filter(t=>t.userId===u.id && t.amount>0).reduce((s,t)=>s+t.amount,0); return {...u, score:Math.round(earned*factor)}; }).sort((a,b)=>b.score-a.score);
+  return `<div class="space-y-6">
+    <div><h1 class="font-display text-2xl sm:text-[28px] font-semibold">Leaderboard</h1><p class="text-white/45 text-sm mt-1">Top students by Skill Credits earned through teaching.</p></div>
+    <div class="flex gap-1 border-b border-white/[0.08]">${["Weekly","Monthly","All Time"].map(t=>`<button onclick="UI.leaderboardTab='${t}'; render()" class="px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${tab===t?"border-violet-400 text-white":"border-transparent text-white/45 hover:text-white/70"}">${t}</button>`).join("")}</div>
+    <div class="grid sm:grid-cols-3 gap-4">${ranked.slice(0,3).map((u,i)=>`<div class="ss-card p-6 text-center relative overflow-hidden ${i===0?"sm:order-2 border-amber-400/30":i===1?"sm:order-1 border-white/20":"sm:order-3 border-orange-400/20"}">
+      <div class="relative"><div class="text-2xl mb-2">${i===0?"🥇":i===1?"🥈":"🥉"}</div>${avatarHTML(u, i===0?60:50)}
+        <p class="font-display font-semibold mt-3">${esc(u.name)}</p><p class="text-xs text-white/40">@${esc(u.username)}</p>
+        <p class="font-display text-xl font-semibold text-cyan-300 mt-2">${u.score}</p><p class="text-[11px] text-white/40">credits earned</p></div></div>`).join("")}</div>
+    <div class="ss-card divide-y divide-white/[0.06]">${ranked.slice(3,15).map((u,i)=>`<button onclick="nav('profile/${u.username}')" class="w-full flex items-center gap-4 px-5 py-3 hover:bg-white/[0.03] transition-colors text-left ${u.id===cu.id?"bg-violet-500/[0.06]":""}">
+      <span class="w-6 text-sm text-white/40 font-mono">${i+4}</span>${avatarHTML(u,32)}
+      <div class="min-w-0 flex-1"><p class="text-sm font-medium truncate">${esc(u.name)}${u.id===cu.id?`<span class="text-violet-300"> (you)</span>`:""}</p><p class="text-xs text-white/35">${u.sessionsTaught} taught · ${u.streak}d streak</p></div>
+      <span class="text-sm font-semibold text-cyan-300">${u.score}</span></button>`).join("")}</div></div>`;
+}
+
+/* ==================================== COMMUNITY ==================================== */
+function CommunityPage(){
+  const cu = currentUser(); const posts = [...DB.posts].sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+  return `<div class="max-w-2xl mx-auto space-y-6">
+    <div><h1 class="font-display text-2xl sm:text-[28px] font-semibold">Community</h1><p class="text-white/45 text-sm mt-1">Questions, achievements, tips, and projects from students.</p></div>
+    <div class="ss-card p-4 flex items-center gap-3">${avatarHTML(cu,36)}
+      <button onclick="openCompose()" class="flex-1 text-left text-sm text-white/35 bg-white/[0.03] border border-white/10 rounded-full px-4 py-2.5 hover:border-white/20 transition-colors">Share something with the community...</button>
+      ${btn({label:"Post", size:"sm", icon:"plus", onclick:"openCompose()"})}</div>
+    ${posts.length===0?emptyState("users","No posts yet","Be the first to share a tip, question, or win.", btn({label:"Create Post", size:"sm", onclick:"openCompose()"}))
+      : `<div class="space-y-4">${posts.map(postCardHTML).join("")}</div>`}
+  </div>`;
+}
+function openCompose(){ UI.compose = { open:true, content:"", category:"Tip" }; renderModals(); }
+function closeCompose(){ UI.compose.open=false; renderModals(); }
+function ComposeModalHTML(){
+  const cu = currentUser(); const c = UI.compose;
+  return `<div class="fixed inset-0 z-[150] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/70 backdrop-blur-sm modal-fade" onclick="closeCompose()"></div>
+    <div class="relative w-full max-w-lg modal-pop rounded-2xl border border-white/10 bg-[#0c0c14] shadow-2xl max-h-[88vh] overflow-y-auto">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]"><h3 class="font-display font-semibold text-white text-[17px]">Create post</h3><button onclick="closeCompose()" class="text-white/40 hover:text-white p-1"><i data-lucide="x" class="w-[18px] h-[18px]"></i></button></div>
+      <div class="p-6 space-y-4">
+        <div class="flex items-center gap-3">${avatarHTML(cu,36)}<span class="text-sm font-medium">${esc(cu.name)}</span></div>
+        <textarea rows="4" maxlength="500" oninput="UI.compose.content=this.value; document.getElementById('composeCount').textContent=this.value.length+'/500'" placeholder="Ask a question, share a win, or drop a tip..." class="ss-input resize-none">${esc(c.content)}</textarea>
+        <div class="flex items-center justify-between">
+          <select onchange="UI.compose.category=this.value" class="ss-input w-44">${["Question","Achievement","Tip","Project","Skill Recommendation"].map(cat=>`<option ${c.category===cat?"selected":""}>${cat}</option>`).join("")}</select>
+          <span id="composeCount" class="text-xs text-white/30">${c.content.length}/500</span></div>
+        ${btn({label:"Publish", extra:"w-full", onclick:"publishPost()"})}
+      </div></div></div>`;
+}
+function publishPost(){
+  const cu = currentUser(); const c = UI.compose;
+  const contentEl = document.querySelector("#modal-root textarea"); const content = contentEl ? contentEl.value : c.content;
+  if (!content.trim()) return;
+  DB.posts.unshift({ id:uid("post"), userId:cu.id, content, category:c.category, likes:[], createdAt:nowISO() });
+  checkAchievements(cu.id);
+  toast("Post published to the community.");
+  UI.compose.open=false; render();
+}
+function postCardHTML(post){
+  const cu = currentUser(); const author = DB.users.find(u=>u.id===post.userId);
+  const liked = post.likes.includes(cu.id);
+  const showComments = !!UI.showComments[post.id];
+  const comments = DB.comments.filter(c=>c.postId===post.id);
+  return `<div class="ss-card p-5"><div class="flex items-start gap-3">
+    <button onclick="nav('profile/${author?.username}')">${avatarHTML(author,38)}</button>
+    <div class="min-w-0 flex-1">
+      <div class="flex items-center gap-2 flex-wrap"><button onclick="nav('profile/${author?.username}')" class="text-sm font-medium text-white hover:underline">${esc(author?.name||"")}</button>
+        <span class="text-xs text-white/30">· ${timeAgo(post.createdAt)}</span>${badgeHTML(post.category,"violet")}</div>
+      <p class="text-sm text-white/75 mt-2 leading-relaxed whitespace-pre-wrap">${esc(post.content)}</p>
+      <div class="flex items-center gap-5 mt-4 text-white/40">
+        <button onclick="toggleLike('${post.id}')" class="flex items-center gap-1.5 text-xs transition-colors ${liked?"text-rose-400":"hover:text-white"}"><i data-lucide="heart" class="w-[15px] h-[15px] ${liked?"fill-current":""}"></i>${post.likes.length}</button>
+        <button onclick="UI.showComments['${post.id}']=!UI.showComments['${post.id}']; render()" class="flex items-center gap-1.5 text-xs hover:text-white transition-colors"><i data-lucide="message-circle" class="w-[15px] h-[15px]"></i>${comments.length}</button>
+        <button onclick="toast('Link copied (demo).','info')" class="flex items-center gap-1.5 text-xs hover:text-white transition-colors"><i data-lucide="share-2" class="w-[15px] h-[15px]"></i>Share</button></div>
+      ${showComments?`<div class="mt-4 space-y-3 border-t border-white/[0.06] pt-4">
+        ${comments.map(c=>{ const cu2 = DB.users.find(u=>u.id===c.userId); return `<div class="flex gap-2.5">${avatarHTML(cu2,26)}<div class="bg-white/[0.04] rounded-xl px-3 py-2 text-sm"><span class="font-medium text-white/85 mr-1.5">${esc(cu2?.name||"")}</span><span class="text-white/60">${esc(c.content)}</span></div></div>`; }).join("")}
+        <div class="flex gap-2 items-center">${avatarHTML(cu,26)}
+          <input value="${esc(UI.commentDraft[post.id]||"")}" oninput="UI.commentDraft['${post.id}']=this.value" onkeydown="if(event.key==='Enter') submitComment('${post.id}')" placeholder="Write a comment..." class="ss-input"/>
+          ${btn({label:"", icon:"send", onclick:`submitComment('${post.id}')`})}</div></div>`:""}
+    </div></div></div>`;
+}
+function toggleLike(postId){
+  const cu = currentUser(); const post = DB.posts.find(p=>p.id===postId); if (!post) return;
+  const has = post.likes.includes(cu.id);
+  post.likes = has ? post.likes.filter(id=>id!==cu.id) : [...post.likes, cu.id];
+  render();
+}
+function submitComment(postId){
+  const cu = currentUser(); const content = (UI.commentDraft[postId]||"").trim(); if (!content) return;
+  DB.comments.push({ id:uid("cm"), postId, userId:cu.id, content, createdAt:nowISO() });
+  UI.commentDraft[postId] = "";
+  render();
+}
+
+/* ==================================== MESSAGES ===================================== */
+function MessagesPage(otherId){
+  const cu = currentUser();
+  const myConvos = DB.conversations.filter(c=>c.members.includes(cu.id)).sort((a,b)=>new Date(b.updatedAt)-new Date(a.updatedAt));
+
+  if (otherId){
+    const existing = myConvos.find(c=>c.members.includes(otherId));
+    UI.messagesActiveId = existing ? existing.id : "new:"+otherId;
+  } else if (!UI.messagesActiveId && myConvos.length){ UI.messagesActiveId = myConvos[0].id; }
+
+  if (myConvos.length===0 && !otherId){
+    return emptyState("message-square","No conversations yet","Message a teacher after booking a session, or reach out from their profile.", btn({label:"Discover Skills", size:"sm", onclick:"nav('discover')"}));
+  }
+  const activeId = UI.messagesActiveId;
+  const isNew = activeId && activeId.startsWith("new:");
+  const otherUserId = isNew ? activeId.split(":")[1] : myConvos.find(c=>c.id===activeId)?.members.find(m=>m!==cu.id);
+  const other = DB.users.find(u=>u.id===otherUserId);
+  const thread = (activeId && !isNew) ? DB.messages.filter(m=>m.conversationId===activeId).sort((a,b)=>new Date(a.createdAt)-new Date(b.createdAt)) : [];
+
+  const list = myConvos.map(c=>{
+    const oid = c.members.find(m=>m!==cu.id); const ou = DB.users.find(u=>u.id===oid);
+    const msgs = DB.messages.filter(m=>m.conversationId===c.id); const last = msgs[msgs.length-1];
+    return `<button onclick="UI.messagesActiveId='${c.id}'; render()" class="w-full flex items-center gap-3 px-4 py-3 border-b border-white/[0.04] text-left hover:bg-white/[0.03] transition-colors ${activeId===c.id?"bg-white/[0.05]":""}">
+      <div class="relative">${avatarHTML(ou,38)}<span class="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-400 ring-2 ring-[#050509]"></span></div>
+      <div class="min-w-0 flex-1"><p class="text-sm font-medium truncate">${esc(ou?.name||"")}</p><p class="text-xs text-white/40 truncate">${esc(last?.content || "Say hello 👋")}</p></div>
+      ${last?`<span class="text-[10px] text-white/30 shrink-0">${timeAgo(last.createdAt)}</span>`:""}</button>`;
+  }).join("");
+
+  const thread_html = other ? `
+    <div class="flex items-center gap-3 px-5 py-3.5 border-b border-white/[0.06]">
+      <button class="sm:hidden text-white/50" onclick="UI.messagesActiveId=null; render()"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
+      ${avatarHTML(other,34)}<div><p class="text-sm font-medium">${esc(other.name)}</p><p class="text-[11px] text-emerald-400">Online</p></div></div>
+    <div id="msgScroll" class="flex-1 overflow-y-auto px-5 py-4 space-y-3">
+      ${thread.length===0?`<p class="text-center text-xs text-white/30 mt-6">Start the conversation with ${esc(other.name.split(" ")[0])}.</p>`:""}
+      ${thread.map(m=>{ const mine = m.senderId===cu.id;
+        return `<div class="flex ${mine?"justify-end":"justify-start"}"><div class="max-w-[75%] rounded-2xl px-4 py-2.5 text-sm ${mine?"bg-gradient-to-br from-violet-600 to-indigo-500 text-white":"bg-white/[0.06] text-white/85"}">${esc(m.content)}<div class="text-[10px] mt-1 ${mine?"text-white/60":"text-white/30"}">${timeAgo(m.createdAt)}</div></div></div>`; }).join("")}
+    </div>
+    <div class="p-4 border-t border-white/[0.06] flex items-center gap-2">
+      <input id="msgInput" placeholder="Write a message..." onkeydown="if(event.key==='Enter') sendMessage('${other.id}')" class="ss-input"/>
+      ${btn({label:"", icon:"send", onclick:`sendMessage('${other.id}')`})}
+    </div>` : `<div class="flex-1 flex items-center justify-center text-white/30 text-sm">Select a conversation</div>`;
+
+  return `<div class="h-[calc(100vh-8.5rem)] lg:h-[calc(100vh-6rem)] -mx-4 sm:-mx-6 lg:-mx-10 -my-6 flex border-t border-white/[0.06]">
+    <div class="w-full sm:w-72 shrink-0 border-r border-white/[0.06] overflow-y-auto ${activeId?"hidden sm:block":""}">${list}</div>
+    <div class="flex-1 flex flex-col ${!activeId?"hidden sm:flex":""}">${thread_html}</div>
+  </div>`;
+}
+function sendMessage(otherId){
+  const cu = currentUser(); const input = document.getElementById("msgInput"); if (!input) return;
+  const content = input.value.trim(); if (!content) return;
+  let cid = UI.messagesActiveId && !UI.messagesActiveId.startsWith("new:") ? UI.messagesActiveId : null;
+  if (!cid){
+    const existing = DB.conversations.find(c=>c.members.includes(cu.id) && c.members.includes(otherId));
+    if (existing) cid = existing.id;
+    else { cid = uid("cv"); DB.conversations.unshift({ id:cid, members:[cu.id, otherId], updatedAt:nowISO() }); }
+  }
+  const conv = DB.conversations.find(c=>c.id===cid); if (conv) conv.updatedAt = nowISO();
+  DB.messages.push({ id:uid("msg"), conversationId:cid, senderId:cu.id, content, createdAt:nowISO() });
+  DB.notifications.unshift({ id:uid("ntf"), userId:otherId, text:`New message from ${cu.name}.`, type:"message", read:false, createdAt:nowISO() });
+  UI.messagesActiveId = cid;
+  render();
+  const scroller = document.getElementById("msgScroll"); if (scroller) scroller.scrollTop = scroller.scrollHeight;
+}
+
+/* =================================== NOTIFICATIONS =================================== */
+const NOTIF_ICON = { session:"calendar", credit:"wallet", booking:"book-open", achievement:"trophy", message:"message-square", community:"heart", streak:"flame", system:"bell" };
+function NotificationsPage(){
+  const cu = currentUser(); const list = DB.notifications.filter(n=>n.userId===cu.id).sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+  return `<div class="max-w-2xl space-y-6">
+    <div class="flex items-center justify-between"><div><h1 class="font-display text-2xl sm:text-[28px] font-semibold">Notifications</h1><p class="text-white/45 text-sm mt-1">Stay on top of sessions, credits, and community activity.</p></div>${btn({label:"Mark all read", variant:"secondary", size:"sm", onclick:"markAllRead()"})}</div>
+    ${list.length===0?emptyState("bell","You're all caught up","New notifications will show up here."):`<div class="space-y-1">${list.map(n=>{
+      const icon = NOTIF_ICON[n.type]||"bell";
+      return `<button onclick="markNotifRead('${n.id}')" class="w-full flex items-start gap-3 p-3.5 rounded-xl text-left transition-colors ${n.read?"hover:bg-white/[0.03]":"bg-violet-500/[0.06] hover:bg-violet-500/[0.09]"}">
+        <div class="h-9 w-9 rounded-full flex items-center justify-center shrink-0 ${n.read?"bg-white/[0.05] text-white/40":"bg-violet-500/15 text-violet-300"}"><i data-lucide="${icon}" class="w-[15px] h-[15px]"></i></div>
+        <div class="min-w-0 flex-1"><p class="text-sm ${n.read?"text-white/55":"text-white/90"}">${esc(n.text)}</p><p class="text-xs text-white/30 mt-0.5">${timeAgo(n.createdAt)}</p></div>
+        ${!n.read?`<span class="h-2 w-2 rounded-full bg-cyan-400 mt-1.5 shrink-0"></span>`:""}</button>`;
+    }).join("")}</div>`}
+  </div>`;
+}
+function markNotifRead(id){ const n = DB.notifications.find(n=>n.id===id); if (n) n.read=true; render(); }
+function markAllRead(){ const cu = currentUser(); DB.notifications.forEach(n=>{ if (n.userId===cu.id) n.read=true; }); render(); }
+
+/* ===================================== PROFILE ===================================== */
+function completionPct(u){ const checks=[!!u.about,!!u.university,u.teachSkills.length>0,u.learnSkills.length>0,!!u.mobile,true]; return Math.round((checks.filter(Boolean).length/checks.length)*100); }
+function ProfilePage(username){
+  const cu = currentUser(); const user = DB.users.find(u=>u.username===username);
+  if (!user) return emptyState("compass","Profile not found","This student doesn't exist on SkillSwap.", btn({label:"Back to SkillSwap", onclick:"nav('')"}));
+  const isMe = cu?.id === user.id;
+  const taughtCount = DB.bookings.filter(b=>b.teacherId===user.id && b.status==="completed").length;
+  const learnedCount = DB.bookings.filter(b=>b.studentId===user.id && b.status==="completed").length;
+  const earned = DB.transactions.filter(t=>t.userId===user.id && t.amount>0).reduce((s,t)=>s+t.amount,0);
+  const unlocked = DB.userAchievements.filter(ua=>ua.userId===user.id);
+  const firstSkill = DB.skills.find(s=>s.teacherId===user.id);
+
+  return `<div class="max-w-4xl mx-auto space-y-6">
+    <div class="ss-card p-6 sm:p-8"><div class="flex flex-col sm:flex-row items-start gap-6">
+      ${avatarHTML(user,84)}
+      <div class="flex-1 min-w-0"><div class="flex items-start justify-between flex-wrap gap-3">
+        <div><h1 class="font-display text-2xl font-semibold">${esc(user.name)}</h1><p class="text-white/40 text-sm">@${esc(user.username)} ${user.university?`· ${esc(user.university)}`:""}</p></div>
+        ${isMe ? btn({label:"Edit Profile", variant:"secondary", size:"sm", icon:"edit-3", onclick:"nav('settings')"})
+          : `<div class="flex gap-2">${btn({label:"Message", variant:"secondary", size:"sm", icon:"message-square", onclick:`nav('messages/${user.id}')`})}${btn({label:"Book Session", size:"sm", onclick:`nav('skills/${firstSkill?.id||""}')`})}</div>`}
+      </div>
+      <p class="text-sm text-white/60 mt-3 max-w-lg leading-relaxed">${esc(user.about || "This student hasn't written an about section yet.")}</p>
+      <div class="flex items-center gap-4 mt-4 flex-wrap text-sm">
+        <span class="flex items-center gap-1 text-amber-400"><i data-lucide="star" class="w-[13px] h-[13px] fill-current"></i>${user.rating}</span>
+        <span class="text-white/40">${taughtCount} taught</span><span class="text-white/40">${learnedCount} learned</span>
+        <span class="text-white/40 flex items-center gap-1"><i data-lucide="flame" class="w-[13px] h-[13px] text-orange-400"></i>${user.streak}d streak</span>
+        <span class="flex items-center gap-1 text-cyan-300"><i data-lucide="wallet" class="w-[13px] h-[13px]"></i>${earned} earned</span>
+      </div></div></div></div>
+    ${isMe?`<div class="ss-card p-5"><div class="flex items-center justify-between mb-2"><h3 class="text-sm font-medium">Profile ${completionPct(user)}% complete</h3>${completionPct(user)<100?btn({label:"Complete Profile", size:"sm", variant:"ghost", onclick:"nav('settings')"}):""}</div>
+      <div class="h-1.5 rounded-full bg-white/[0.06] overflow-hidden"><div class="h-full bg-gradient-to-r from-violet-500 to-cyan-400 transition-all duration-500" style="width:${completionPct(user)}%"></div></div></div>`:""}
+    <div class="grid md:grid-cols-2 gap-5">
+      <div class="ss-card p-5"><h3 class="font-display font-semibold mb-3 flex items-center gap-2"><i data-lucide="graduation-cap" class="w-4 h-4 text-violet-300"></i>Can teach</h3>
+        ${user.teachSkills.length===0?`<p class="text-sm text-white/35">No teaching skills added yet.</p>`:`<div class="space-y-2">${user.teachSkills.map(s=>`<div class="flex items-center justify-between p-2.5 rounded-lg bg-white/[0.03]"><span class="text-sm">${esc(s.name)}</span>${badgeHTML(s.level)}</div>`).join("")}</div>`}</div>
+      <div class="ss-card p-5"><h3 class="font-display font-semibold mb-3 flex items-center gap-2"><i data-lucide="book-open" class="w-4 h-4 text-cyan-300"></i>Wants to learn</h3>
+        ${user.learnSkills.length===0?`<p class="text-sm text-white/35">No learning interests added yet.</p>`:`<div class="flex flex-wrap gap-2">${user.learnSkills.map(s=>badgeHTML(s.name,"cyan")).join("")}</div>`}</div></div>
+    <div class="ss-card p-5"><h3 class="font-display font-semibold mb-4 flex items-center gap-2"><i data-lucide="trophy" class="w-4 h-4 text-amber-300"></i>Achievements</h3>
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">${ACHIEVEMENTS.map(a=>{
+        const has = unlocked.find(u=>u.achievementId===a.id);
+        return `<div class="p-3.5 rounded-xl border text-center ${has?"border-amber-400/30 bg-amber-400/[0.06]":"border-white/[0.06] bg-white/[0.02] opacity-50"}">
+          <i data-lucide="${a.icon}" class="w-[18px] h-[18px] mx-auto mb-2 ${has?"text-amber-300":"text-white/30"}"></i>
+          <p class="text-[12px] font-medium">${esc(a.name)}</p><p class="text-[10.5px] text-white/35 mt-0.5">${esc(a.desc)}</p></div>`;
+      }).join("")}</div></div>
+  </div>`;
+}
+
+/* ==================================== SETTINGS ==================================== */
+function SettingsPage(){
+  const tabs = [["profile","Profile","user-circle-2"],["account","Account","shield-check"],["notifications","Notifications","bell"],["privacy","Privacy","lock"],["appearance","Appearance","palette"],["security","Security","credit-card"]];
+  let content = "";
+  switch(UI.settingsTab){
+    case "profile": content = ProfileSettingsHTML(); break;
+    case "account": content = AccountSettingsHTML(); break;
+    case "notifications": content = NotificationSettingsHTML(); break;
+    case "privacy": content = PrivacySettingsHTML(); break;
+    case "appearance": content = AppearanceSettingsHTML(); break;
+    case "security": content = SecuritySettingsHTML(); break;
+  }
+  return `<div class="max-w-4xl space-y-6">
+    <div><h1 class="font-display text-2xl sm:text-[28px] font-semibold">Settings</h1><p class="text-white/45 text-sm mt-1">Manage your profile, account, and preferences.</p></div>
+    <div class="flex gap-1 overflow-x-auto border-b border-white/[0.08] pb-px">${tabs.map(([k,label,icon])=>`<button onclick="UI.settingsTab='${k}'; render()" class="flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 -mb-px whitespace-nowrap transition-colors ${UI.settingsTab===k?"border-violet-400 text-white":"border-transparent text-white/45 hover:text-white/70"}"><i data-lucide="${icon}" class="w-[14px] h-[14px]"></i>${label}</button>`).join("")}</div>
+    ${content}</div>`;
+}
+function ProfileSettingsHTML(){
+  const cu = currentUser();
+  return `<div class="space-y-5">
+    <div class="ss-card p-6">
+      <div class="flex items-center gap-4 mb-6">${avatarHTML(cu,64)}<div class="flex gap-2">${btn({label:"Change Photo", size:"sm", variant:"secondary", icon:"camera", onclick:"changePhoto()"})}${btn({label:"Remove", size:"sm", variant:"ghost", onclick:"removePhoto()"})}</div></div>
+      <div class="grid sm:grid-cols-2 gap-4">
+        ${fieldHTML("Full name", `<input id="pf_name" value="${esc(cu.name)}" class="ss-input"/>`, {required:true})}
+        ${fieldHTML("Username", `<input id="pf_username" value="${esc(cu.username)}" class="ss-input"/>`, {required:true})}
+        ${fieldHTML("Email", `<input value="${esc(cu.email)}" disabled class="ss-input opacity-60"/>`, {required:true, hint:"Required for login"})}
+        ${fieldHTML("Mobile number", `<input id="pf_mobile" value="${esc(cu.mobile)}" placeholder="+1 555 0100" class="ss-input"/>`, {hint:"Optional"})}
+        ${fieldHTML("University", `<input id="pf_university" value="${esc(cu.university)}" class="ss-input"/>`, {hint:"Optional"})}
+      </div>
+      <div class="mt-4">${fieldHTML("About me", `<textarea id="pf_about" rows="3" maxlength="280" class="ss-input resize-none" placeholder="Tell other students about yourself...">${esc(cu.about)}</textarea>`, {hint:`${(cu.about||"").length}/280`})}</div>
+      ${btn({label:"Save Changes", extra:"mt-5", onclick:"saveProfile()"})}
+    </div>
+    <div class="ss-card p-6"><h3 class="font-display font-semibold mb-3">I can teach</h3>
+      <div class="flex flex-wrap gap-2 mb-4">${cu.teachSkills.map((s,i)=>`<span class="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] pl-3 pr-1.5 py-1 text-xs">${esc(s.name)} · ${esc(s.level)}<button onclick="removeTeachSkill(${i})" class="text-white/30 hover:text-rose-400 ml-1"><i data-lucide="x" class="w-3 h-3"></i></button></span>`).join("")}
+      ${cu.teachSkills.length===0?`<span class="text-xs text-white/30">No skills added yet.</span>`:""}</div>
+      <div class="flex gap-2"><input id="newTeachInput" value="${esc(UI.newTeach)}" oninput="UI.newTeach=this.value" placeholder="e.g. Photography" class="ss-input flex-1"/>
+        <select id="newTeachLevel" onchange="UI.newLevel=this.value" class="ss-input w-36">${["Beginner","Intermediate","Advanced"].map(l=>`<option ${UI.newLevel===l?"selected":""}>${l}</option>`).join("")}</select>
+        ${btn({label:"Add", icon:"plus", onclick:"addTeachSkill()"})}</div></div>
+    <div class="ss-card p-6"><h3 class="font-display font-semibold mb-3">I want to learn</h3>
+      <div class="flex flex-wrap gap-2 mb-4">${cu.learnSkills.map((s,i)=>`<span class="inline-flex items-center gap-1.5 rounded-full border border-cyan-400/20 bg-cyan-400/[0.06] pl-3 pr-1.5 py-1 text-xs text-cyan-200">${esc(s.name)}<button onclick="removeLearnSkill(${i})" class="text-white/30 hover:text-rose-400 ml-1"><i data-lucide="x" class="w-3 h-3"></i></button></span>`).join("")}
+      ${cu.learnSkills.length===0?`<span class="text-xs text-white/30">No interests added yet.</span>`:""}</div>
+      <div class="flex gap-2"><input id="newLearnInput" value="${esc(UI.newLearn)}" oninput="UI.newLearn=this.value" placeholder="e.g. Spanish" class="ss-input flex-1"/>${btn({label:"Add", icon:"plus", onclick:"addLearnSkill()"})}</div></div>
+  </div>`;
+}
+function changePhoto(){ const cu = currentUser(); cu.avatarColor = AVATAR_HUES[Math.floor(Math.random()*AVATAR_HUES.length)]; saveProfileToServer(); toast("Profile photo updated."); render(); }
+function removePhoto(){ const cu = currentUser(); cu.avatarColor = hueFor(cu.name); saveProfileToServer(); render(); }
+function saveProfile(){
+  const cu = currentUser();
+  cu.name = document.getElementById("pf_name").value;
+  cu.username = document.getElementById("pf_username").value;
+  cu.university = document.getElementById("pf_university").value;
+  cu.mobile = document.getElementById("pf_mobile").value;
+  cu.about = document.getElementById("pf_about").value;
+  saveProfileToServer(); toast("Profile updated successfully."); render();
+}
+function addTeachSkill(){ const cu = currentUser(); if (UI.newTeach.trim()){ cu.teachSkills.push({name:UI.newTeach.trim(), level:UI.newLevel, years:1}); UI.newTeach=""; saveProfileToServer(); render(); } }
+function removeTeachSkill(i){ const cu = currentUser(); cu.teachSkills.splice(i,1); saveProfileToServer(); render(); }
+function addLearnSkill(){ const cu = currentUser(); if (UI.newLearn.trim()){ cu.learnSkills.push({name:UI.newLearn.trim()}); UI.newLearn=""; saveProfileToServer(); render(); } }
+function removeLearnSkill(i){ const cu = currentUser(); cu.learnSkills.splice(i,1); saveProfileToServer(); render(); }
+
+let CONFIRM_DELETE = false;
+function AccountSettingsHTML(){
+  const cu = currentUser();
+  return `<div class="space-y-5">
+    <div class="ss-card p-6 space-y-4">
+      <div class="flex items-center justify-between"><div><p class="text-sm text-white/40">Email</p><p class="text-sm font-medium">${esc(cu.email)}</p></div>${badgeHTML("Required for login","violet")}</div>
+      <div class="h-px bg-white/[0.06]"></div>
+      <div class="flex items-center justify-between"><div><p class="text-sm text-white/40">Mobile number</p><p class="text-sm font-medium">${esc(cu.mobile || "Not set (optional)")}</p></div></div>
+      <div class="h-px bg-white/[0.06]"></div>
+      <div class="flex items-center justify-between"><div><p class="text-sm text-white/40">Member since</p><p class="text-sm font-medium">${new Date(cu.createdAt).toLocaleDateString(undefined,{month:"long",day:"numeric",year:"numeric"})}</p></div></div>
+    </div>
+    <div class="ss-card p-6 flex items-center justify-between"><div><p class="text-sm font-medium">Log out</p><p class="text-xs text-white/40">End your session on this device.</p></div>${btn({label:"Log Out", variant:"secondary", icon:"log-out", onclick:"doLogout()"})}</div>
+    <div class="ss-card p-6 border-rose-500/20"><p class="text-sm font-medium text-rose-300 mb-1">Delete account</p><p class="text-xs text-white/40 mb-4">This permanently removes your profile, skills, and credit history from this browser.</p>
+      ${!CONFIRM_DELETE ? btn({label:"Delete Account", variant:"danger", icon:"trash-2", onclick:"CONFIRM_DELETE=true; render()"})
+        : `<div class="flex gap-2 items-center"><span class="text-xs text-white/50">Are you sure?</span>${btn({label:"Yes, delete", size:"sm", variant:"danger", onclick:"deleteAccount()"})}${btn({label:"Cancel", size:"sm", variant:"ghost", onclick:"CONFIRM_DELETE=false; render()"})}</div>`}
+    </div></div>`;
+}
+function deleteAccount(){ localStorage.removeItem(DB_KEY); window.location.hash=""; window.location.reload(); }
+function NotificationSettingsHTML(){
+  const p = UI.notifPrefs;
+  const labels = { sessions:"Session reminders", credits:"Credit activity", community:"Community likes & comments", messages:"New messages", marketing:"Product updates" };
+  return `<div class="ss-card p-6 space-y-4">${Object.entries(labels).map(([k,label])=>`<div class="flex items-center justify-between py-1"><span class="text-sm text-white/70">${label}</span>
+    <button onclick="UI.notifPrefs['${k}']=!UI.notifPrefs['${k}']; render()" class="toggle ${p[k]?"bg-violet-500":"bg-white/10"}"><span class="toggle-knob" style="transform:translateX(${p[k]?"16px":"0"})"></span></button></div>`).join("")}</div>`;
+}
+function PrivacySettingsHTML(){
+  const p = UI.privacy.pub;
+  return `<div class="ss-card p-6 space-y-4">
+    <div class="flex items-center justify-between"><div><p class="text-sm text-white/70">Public profile</p><p class="text-xs text-white/35">Allow other students to view your profile and book sessions.</p></div>
+      <button onclick="UI.privacy.pub=!UI.privacy.pub; render()" class="toggle ${p?"bg-violet-500":"bg-white/10"}"><span class="toggle-knob" style="transform:translateX(${p?"16px":"0"})"></span></button></div>
+    <div class="h-px bg-white/[0.06]"></div>
+    <div class="flex items-center justify-between"><div><p class="text-sm text-white/70">Show online status</p><p class="text-xs text-white/35">Let others see when you're active.</p></div>
+      <button class="toggle bg-violet-500"><span class="toggle-knob" style="transform:translateX(16px)"></span></button></div></div>`;
+}
+function AppearanceSettingsHTML(){
+  return `<div class="ss-card p-6"><p class="text-sm text-white/70 mb-4">Theme</p>
+    <div class="grid grid-cols-2 gap-3 max-w-sm">
+      <div class="rounded-xl border-2 border-violet-400/60 bg-[#0a0a11] p-4 text-center"><div class="h-10 rounded-lg bg-gradient-to-br from-violet-600 to-cyan-400 mb-2"></div><span class="text-xs">Dark (default)</span></div>
+      <div class="rounded-xl border border-white/10 bg-white/[0.02] p-4 text-center opacity-40"><div class="h-10 rounded-lg bg-white/20 mb-2"></div><span class="text-xs">Light (coming soon)</span></div>
+    </div></div>`;
+}
+function SecuritySettingsHTML(){
+  const s = UI.security;
+  return `<div class="ss-card p-6 max-w-md"><h3 class="font-display font-semibold mb-4">Change password</h3>
+    <form onsubmit="return submitPasswordChange(event)" class="space-y-4">
+      ${fieldHTML("Current password", passwordInputHTML("sec_cur", s.cur))}
+      ${fieldHTML("New password", passwordInputHTML("sec_n1", s.n1, true))}
+      ${fieldHTML("Confirm new password", passwordInputHTML("sec_n2", s.n2))}
+      ${s.err?`<p class="text-[13px] text-rose-400 flex items-center gap-1.5"><i data-lucide="alert-circle" class="w-[13px] h-[13px]"></i>${esc(s.err)}</p>`:""}
+      ${btn({label:"Update Password", type:"submit"})}
+    </form></div>`;
+}
+window.sec_cur_input = (v)=>{ UI.security.cur=v; };
+window.sec_n1_input = (v)=>{ UI.security.n1=v; renderPwStrength("sec_n1", v); };
+window.sec_n2_input = (v)=>{ UI.security.n2=v; };
+function submitPasswordChange(e){
+  e.preventDefault();
+  const s = UI.security; s.err="";
+  const cur = document.getElementById("sec_cur").value, n1 = document.getElementById("sec_n1").value, n2 = document.getElementById("sec_n2").value;
+  if (!cur || !n1){ s.err="Fill in all fields."; render(); return false; }
+  if (n1.length < 8){ s.err="New password must be at least 8 characters."; render(); return false; }
+  if (n1 !== n2){ s.err="New passwords don't match."; render(); return false; }
+  UI.security = { cur:"", n1:"", n2:"", err:"" };
+  toast("Password updated successfully."); render();
+  return false;
+}
+
+/* =================================== 404 =================================== */
+function NotFoundPage(){
+  return PublicShell(`<div class="relative flex flex-col items-center justify-center text-center px-6 py-24">
+    <div class="h-16 w-16 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-center mb-6"><i data-lucide="compass" class="w-[26px] h-[26px] text-violet-300"></i></div>
+    <h1 class="font-display text-3xl font-semibold mb-2">Lost in the skill network?</h1>
+    <p class="text-white/45 mb-7 max-w-sm">The page you're looking for doesn't exist.</p>
+    ${btn({label:"Back to SkillSwap", onclick:"nav('')"})}</div>`);
+}
+
+/* =================================== INIT =================================== */
+// wire up password-strength inputs generically for login/signup (fallback if window fns not hit)
+document.addEventListener("input", (e)=>{
+  if (e.target && e.target.id === "signup_password") renderPwStrength("signup_password", e.target.value);
+});
+render();
+function revealHomeHero(){
+  const hero=document.querySelector(".ss-hero");
+  if(!hero || hero.classList.contains("is-intro-revealed")) return;
+  const heading=hero.querySelector("h1");
+  if(heading){
+    heading.setAttribute("aria-label",heading.innerText.replace(/\s+/g," ").trim());
+    let charIndex=0;
+    heading.querySelectorAll(":scope > span").forEach(line=>{
+      const words=line.textContent.trim().split(/\s+/);
+      line.setAttribute("aria-hidden","true");
+      line.replaceChildren();
+      words.forEach((word,wordIndex)=>{
+        if(wordIndex) line.append(document.createTextNode(" "));
+        const wordWrap=document.createElement("span"); wordWrap.className="ss-type-word";
+        Array.from(word).forEach(char=>{
+          const letter=document.createElement("span"); letter.className="ss-type-char";
+          letter.style.setProperty("--char-delay",`${charIndex++ * 18}ms`); letter.textContent=char; wordWrap.append(letter);
+        });
+        line.append(wordWrap);
+      });
+    });
+  }
+  requestAnimationFrame(()=>hero.classList.add("is-intro-revealed"));
+}
+function playBrandIntro(){
+  if(window.matchMedia("(prefers-reduced-motion: reduce)").matches){ revealHomeHero(); return; }
+  const target=[...document.querySelectorAll("[data-brand-target]")].find(el=>el.getBoundingClientRect().width>0);
+  if(!target){ revealHomeHero(); return; }
+  const overlay=document.createElement("div"); overlay.className="ss-intro";
+  overlay.innerHTML=`<div class="ss-intro-tunnel"></div><div class="ss-intro-flash"></div><div class="ss-intro-brand">${logoHTML(true,80)}</div><div class="ss-intro-caption">Learn more. Teach what you know.</div>`;
+  document.body.appendChild(overlay);
+  const brand=overlay.querySelector(".ss-intro-brand"), start=brand.getBoundingClientRect(), end=target.getBoundingClientRect();
+  const dx=end.left+end.width/2-(start.left+start.width/2), dy=end.top+end.height/2-(start.top+start.height/2), scale=end.width/start.width;
+  const duration=2100;
+  const tunnel=overlay.querySelector(".ss-intro-tunnel");
+  tunnel.animate([
+    {transform:"translate(-50%,-50%) scale(.08) rotate(-22deg)",opacity:0},
+    {offset:.2,transform:"translate(-50%,-50%) scale(.48) rotate(0deg)",opacity:.8},
+    {offset:.72,transform:"translate(-50%,-50%) scale(1.65) rotate(100deg)",opacity:.62},
+    {transform:"translate(-50%,-50%) scale(3.4) rotate(190deg)",opacity:0}
+  ],{duration,easing:"cubic-bezier(.55,.02,.28,1)",fill:"forwards"});
+  const flash=overlay.querySelector(".ss-intro-flash");
+  flash.animate([{opacity:0},{offset:.16,opacity:.7},{offset:.28,opacity:0},{offset:.8,opacity:0},{opacity:.32}],{duration,easing:"ease-out",fill:"forwards"});
+  brand.animate([
+    {transform:"translate(-50%,-50%) scale(.72)",filter:"blur(12px)",opacity:0},
+    {offset:.18,transform:"translate(-50%,-50%) scale(1.04)",filter:"blur(0)",opacity:1,easing:"cubic-bezier(.16,1,.3,1)"},
+    {offset:.55,transform:"translate(-50%,-50%) scale(1)",filter:"blur(0)",opacity:1},
+    {transform:`translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px)) scale(${scale})`,filter:"blur(0)",opacity:1}
+  ],{duration,easing:"cubic-bezier(.76,0,.18,1)",fill:"forwards"});
+  const fade=overlay.animate([{opacity:1},{offset:.76,opacity:1},{opacity:0}],{duration:duration+260,easing:"cubic-bezier(.7,0,.3,1)",fill:"forwards"});
+  fade.onfinish=()=>{ overlay.remove(); revealHomeHero(); };
+}
+playBrandIntro();
+function startFaviconAnimation(){
+  const link=document.getElementById("ss-favicon"); if(!link) return;
+  const canvas=document.createElement("canvas"); canvas.width=32; canvas.height=32;
+  const ctx=canvas.getContext("2d"); if(!ctx) return;
+  let angle=0;
+  const draw=()=>{
+    ctx.clearRect(0,0,32,32);
+    const dx=Math.cos(angle)*4,dy=Math.sin(angle)*4,x1=16-dx,y1=16-dy,x2=16+dx,y2=16+dy;
+    const line=ctx.createLinearGradient(x1,y1,x2,y2); line.addColorStop(0,"#7c3aed"); line.addColorStop(1,"#22d3ee");
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.strokeStyle=line; ctx.lineWidth=1.5; ctx.lineCap="round"; ctx.stroke();
+    ctx.beginPath(); ctx.arc(x1,y1,4.8,0,Math.PI*2); ctx.fillStyle="#7c3aed"; ctx.fill();
+    ctx.beginPath(); ctx.arc(x2,y2,4.8,0,Math.PI*2); ctx.fillStyle="#22d3ee"; ctx.fill();
+    link.type="image/png"; link.href=canvas.toDataURL("image/png");
+  };
+  draw();
+  if(!window.matchMedia("(prefers-reduced-motion: reduce)").matches)
+    setInterval(()=>{ if(document.hidden) return; angle+=.16; draw(); },250);
+}
+startFaviconAnimation();
+let mouseFrame=0, lastTiltCard=null, lastPointerPaint=0;
+document.addEventListener("pointermove",e=>{
+  if(e.pointerType!=="mouse" || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  if(mouseFrame) return;
+  mouseFrame=requestAnimationFrame(()=>{
+    mouseFrame=0;
+    const now=performance.now();
+    if(now-lastPointerPaint>=50){
+      document.documentElement.style.setProperty("--pointer-x",`${e.clientX}px`);
+      document.documentElement.style.setProperty("--pointer-y",`${e.clientY}px`);
+      lastPointerPaint=now;
+    }
+    const dx=e.clientX-WAVE_MOUSE.x,dy=e.clientY-WAVE_MOUSE.y,speed=Math.hypot(dx,dy);
+    if(speed>1 && dx+dy<0){ WAVE_MOUSE.energy=Math.min(1,WAVE_MOUSE.energy+Math.min(speed/90,.35)); WAVE_MOUSE.originX=e.clientX; WAVE_MOUSE.originY=e.clientY; WAVE_MOUSE.lastImpulse=performance.now(); }
+    WAVE_MOUSE.x=e.clientX; WAVE_MOUSE.y=e.clientY;
+    const card=e.target.closest?.(".ss-tilt");
+    if(lastTiltCard && lastTiltCard!==card){ lastTiltCard.style.setProperty("--tilt-x","0deg"); lastTiltCard.style.setProperty("--tilt-y","0deg"); }
+    lastTiltCard=card;
+    if(card){ const r=card.getBoundingClientRect(); card.style.setProperty("--tilt-x",`${((e.clientX-r.left)/r.width-.5)*7}deg`); card.style.setProperty("--tilt-y",`${(.5-(e.clientY-r.top)/r.height)*7}deg`); }
+  });
+},{passive:true});
+document.addEventListener("pointerout",e=>{
+  if(e.pointerType!=="mouse") return;
+  if(!e.relatedTarget){ document.documentElement.style.setProperty("--pointer-x","50%"); document.documentElement.style.setProperty("--pointer-y","35%"); }
+  const card=e.target.closest?.(".ss-tilt");
+  if(card && !card.contains(e.relatedTarget)){ card.style.setProperty("--tilt-x","0deg"); card.style.setProperty("--tilt-y","0deg"); if(lastTiltCard===card) lastTiltCard=null; }
+},{passive:true});
+if(ssClient){
+  ssClient.auth.getSession().then(async({data})=>{ if(data.session) try{ await syncProfile(data.session.user); }catch(e){toast("Could not load your server profile: "+e.message,"error");} });
+}
+</script>
+</body>
+</html>
+
