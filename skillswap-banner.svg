@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">SkillSwap — Learn more. Teach what you know.</title>
+  <desc id="desc">A dark purple and cyan banner with softly moving waves and a glowing orbital SkillSwap mark.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="360" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#090511"/><stop offset=".52" stop-color="#080A13"/><stop offset="1" stop-color="#031416"/>
+    </linearGradient>
+    <linearGradient id="titleGlow" x1="92" y1="126" x2="710" y2="245" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff"/><stop offset=".62" stop-color="#D8CCFF"/><stop offset="1" stop-color="#8BEAFF"/>
+    </linearGradient>
+    <linearGradient id="link" x1="0" y1="0" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#A78BFA"/><stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+    <radialGradient id="portal" cx="0" cy="0" r="1" gradientTransform="translate(900 177) rotate(90) scale(138)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7C3AED" stop-opacity=".3"/><stop offset=".68" stop-color="#0B1020" stop-opacity=".16"/><stop offset="1" stop-color="#05060A" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="softGlow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="clip"><rect width="1200" height="360" rx="28"/></clipPath>
+  </defs>
+  <style>
+    .orbit-a { animation: orbit 22s linear infinite; transform-origin:900px 180px; }
+    .orbit-b { animation: orbit 30s linear infinite reverse; transform-origin:900px 180px; }
+    .wave { animation: drift 12s ease-in-out infinite alternate; }
+    .wave-late { animation: drift 16s ease-in-out -7s infinite alternate-reverse; }
+    .pulse { animation: breathe 4s ease-in-out infinite; transform-origin:900px 180px; }
+    @keyframes orbit { to { transform:rotate(360deg); } }
+    @keyframes drift { to { transform:translate(18px,-8px); } }
+    @keyframes breathe { 50% { opacity:.45; transform:scale(1.07); } }
+    @media (prefers-reduced-motion: reduce) {
+      .orbit-a,.orbit-b,.wave,.wave-late,.pulse { animation:none; }
+    }
+  </style>
+  <g clip-path="url(#clip)">
+    <rect width="1200" height="360" rx="28" fill="url(#bg)"/>
+    <circle cx="900" cy="180" r="168" fill="url(#portal)"/>
+    <g opacity=".14" stroke="#9A76FF">
+      <path class="wave" d="M540 23C668 23 660 116 790 116s126-93 256-93 126 93 256 93"/>
+      <path class="wave-late" d="M500 56c126 0 126 94 252 94s126-94 252-94 126 94 252 94"/>
+      <path class="wave" d="M486 256c132 0 132-94 264-94s132 94 264 94 132-94 264-94"/>
+      <path class="wave-late" d="M500 294c126 0 126-86 252-86s126 86 252 86 126-86 252-86"/>
+    </g>
+    <g stroke="#BCA7FF" stroke-opacity=".22">
+      <circle cx="900" cy="180" r="106"/><circle cx="900" cy="180" r="132" stroke-dasharray="2 8"/>
+      <ellipse cx="900" cy="180" rx="160" ry="64" transform="rotate(-28 900 180)"/>
+      <ellipse cx="900" cy="180" rx="160" ry="64" transform="rotate(42 900 180)"/>
+    </g>
+    <circle class="pulse" cx="900" cy="180" r="56" fill="#4C1D95" fill-opacity=".12" stroke="#A78BFA" stroke-opacity=".45"/>
+    <g class="orbit-a" filter="url(#softGlow)"><circle cx="900" cy="74" r="5" fill="#A78BFA"/><circle cx="900" cy="74" r="2" fill="#fff"/></g>
+    <g class="orbit-b" filter="url(#softGlow)"><circle cx="900" cy="48" r="3.5" fill="#22D3EE"/></g>
+    <g filter="url(#softGlow)">
+      <circle cx="881" cy="162" r="11" fill="#7C3AED"/><circle cx="919" cy="198" r="11" fill="#22D3EE"/>
+      <path d="m889 170 22 20" stroke="url(#link)" stroke-width="4" stroke-linecap="round"/>
+    </g>
+    <text x="78" y="84" fill="#B9A5FF" font-family="Arial,sans-serif" font-size="13" font-weight="700" letter-spacing="4">PEER-TO-PEER LEARNING</text>
+    <text x="72" y="164" fill="url(#titleGlow)" font-family="Arial,sans-serif" font-size="64" font-weight="700" letter-spacing="-3">Learn more.</text>
+    <text x="72" y="232" fill="url(#titleGlow)" font-family="Arial,sans-serif" font-size="56" font-weight="700" letter-spacing="-2.5">Teach what you know.</text>
+    <text x="78" y="280" fill="#A6A1B8" font-family="Arial,sans-serif" font-size="17">Share skills · Earn credits · Learn together</text>
+    <rect x="78" y="311" width="168" height="3" rx="2" fill="url(#link)" opacity=".9"/>
+    <circle cx="1190" cy="44" r="3" fill="#22D3EE" opacity=".8"/>
+    <circle cx="528" cy="313" r="2" fill="#A78BFA" opacity=".75"/>
+  </g>
+</svg>
