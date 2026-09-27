@@ -1,12 +1,16 @@
 <div align="center">
 
-<img src="skillswap-banner.svg" alt="SkillSwap — Learn more. Teach what you know." width="100%" />
+<img src="skillswap-banner.gif" alt="Animated SkillSwap banner with a looping typewriter headline, moving waves, and a glowing portal." width="100%" />
 
 ### Learn from each other. Grow together.
 
 **SkillSwap** is a peer-to-peer learning platform where students share skills, teach what they know, and use Skill Credits to learn something new.
 
 [Open SkillSwap](https://joyful-blini-599dc7.netlify.app) · [Supabase setup](SUPABASE_SETUP.md)
+
+<br />
+
+<img src="skill-loop.gif" alt="Animated SkillSwap cycle: share a skill, teach to earn credits, and learn something new." width="96%" />
 
 </div>
 
@@ -20,6 +24,8 @@
 - **Keep up with the community** with posts, comments, messages, and notifications.
 - **Track your progress** with a dashboard, activity history, and leaderboard.
 - Enjoy a responsive dark interface with animated backgrounds and reduced-motion support.
+
+The README artwork is animated too: its headline types line by line and loops, while the skill cycle has drifting cards, flowing connectors, traveling lights, and pulsing ripples. Animated GIFs are used so the motion plays in GitHub's README view; matching SVG source files are included for editing.
 
 > The landing page includes illustrative demo statistics. Configure Supabase to enable account sign-in and cross-device account data. See the setup guide for database and sync details.
 
@@ -59,7 +65,11 @@ Skillswap/
 ├── supabase-config.js        # Supabase project URL and anon/public key
 ├── SUPABASE_SETUP.md         # Database, auth, and deployment setup
 ├── README.md
-└── skillswap-banner.svg      # Animated README banner
+└── assets/
+    ├── skillswap-banner.gif  # README animation: typewriter headline and portal
+    ├── skill-loop.gif        # README animation: Share → Teach → Learn
+    ├── skillswap-banner.svg  # Editable vector source
+    └── skill-loop.svg        # Editable vector source
 ```
 
 ## 💜 The idea
