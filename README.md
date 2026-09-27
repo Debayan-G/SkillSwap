@@ -86,6 +86,4 @@ Knowledge is currency. SkillSwap makes it easier for students to exchange what t
 
 [<img src="github-follow.gif" alt="Animated invitation: visit my GitHub profile and consider following me." width="100%" />](https://github.com/Debayan-G)
 
-*The animated banner is clickable too.*
-
 </div>
