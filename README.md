@@ -59,8 +59,7 @@ Skillswap/
 ├── supabase-config.js        # Supabase project URL and anon/public key
 ├── SUPABASE_SETUP.md         # Database, auth, and deployment setup
 ├── README.md
-└── assets/
-    └── skillswap-banner.svg  # Animated README banner
+└── skillswap-banner.svg      # Animated README banner
 ```
 
 ## 💜 The idea
